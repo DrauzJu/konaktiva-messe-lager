@@ -1,0 +1,18 @@
+.data-table {
+  --easy-table-header-font-size: 1rem;
+  --easy-table-header-height: 50px;
+  --easy-table-header-font-color: #c1cad4;
+  --easy-table-header-background-color: #2d3a4f;
+
+  --easy-table-body-even-row-font-color: #000000;
+  --easy-table-body-even-row-background-color: #8f97a5;
+
+  --easy-table-body-row-font-color: #000000;
+  --easy-table-body-row-background-color: #ffffff;
+
+  --easy-table-body-row-height: 50px;
+  --easy-table-body-row-font-size: 0.75rem;
+
+  --easy-table-body-row-hover-font-color: #000000;
+  --easy-table-body-row-hover-background-color: #e6007e;
+}
