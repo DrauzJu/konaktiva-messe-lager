@@ -1,0 +1,15 @@
+{
+  "name": "messe-lager-dto",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint \"{src,apps,libs}/**/*.ts\" --fix"
+  },
+  "dependencies": {
+    "class-validator": "^0.14.0",
+    "reflect-metadata": "^0.1.13"
+  }
+}

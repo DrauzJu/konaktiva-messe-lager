@@ -9,7 +9,7 @@ import getDBConfiguration from './db.conf';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client', 'dist'),
+      rootPath: join(__dirname, '..', '..', 'client', 'dist'),
       serveRoot: '/',
     }),
     TypeOrmModule.forRootAsync({

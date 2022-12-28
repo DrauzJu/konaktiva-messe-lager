@@ -70,8 +70,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { ClickRowArgument, Header, Item } from 'vue3-easy-data-table';
-import NewPacketCard from './NewPacketCard.vue';
-import PacketCard from './PacketCard.vue';
+import NewPacketCard from '@/components/NewPacketCard.vue';
+import PacketCard from '@/components/PacketCard.vue';
 
 const rowsPerPage = 10000; // "disable" pagination
 const searchField = ["number", "company", "location"];

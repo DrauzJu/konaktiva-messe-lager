@@ -1,6 +1,6 @@
 {
-  "name": "client",
-  "version": "0.0.0",
+  "name": "messe-lager-client",
+  "version": "1.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.1.96",
+    "messe-lager-dto": "1.0.0",
     "roboto-fontface": "*",
     "vue": "^3.2.38",
     "vue-router": "4",

@@ -160,9 +160,8 @@
 </template>
 
 <script setup lang="ts">
-import Packet from '@/data/Packet';
-import { PacketMovement, PacketMovementType } from '@/data/PacketMovement';
 import { onMounted, reactive, ref, computed } from 'vue';
+import { PacketDto, PacketMovementDto, PacketMovementType } from 'messe-lager-dto';
 
 const props = defineProps({
   parentDialogActive: { type: Boolean, required: true },
@@ -171,10 +170,10 @@ const props = defineProps({
 
 const emit = defineEmits(['update:parentDialogActive'])
 
-const packet: Packet = reactive(new Packet(props.packetID, "", "", ""));
+const packet: PacketDto = reactive(new PacketDto(props.packetID, "", "", ""));
 const loading = ref(false);
 const selectedAction = ref<string>();
-const movements: PacketMovement[] = reactive<PacketMovement[]>([]);
+const movements: PacketMovementDto[] = reactive<PacketMovementDto[]>([]);
 
 const saveButtonText = computed(() => {
   if(!selectedAction.value) {
@@ -189,7 +188,7 @@ const saveButtonText = computed(() => {
   }
 });
 
-const getMovementColor = (movement: PacketMovement) => {
+const getMovementColor = (movement: PacketMovementDto) => {
   switch(movement.type) {
     case PacketMovementType.IN: return "success";
     case PacketMovementType.OUT: return "error";
@@ -202,7 +201,7 @@ onMounted(() => {
   packet.day = "Mittwoch";
   packet.location = "A7";
 
-  movements.push(new PacketMovement(
+  movements.push(new PacketMovementDto(
     0,
     packet,
     new Date(2022,11,24,8,20),
@@ -212,7 +211,7 @@ onMounted(() => {
     "Jakob F."
   ));
 
-  movements.push(new PacketMovement(
+  movements.push(new PacketMovementDto(
     1,
     packet,
     new Date(2022,11,24,9,20),
@@ -222,7 +221,7 @@ onMounted(() => {
     "Jakob F."
   ));
 
-  movements.push(new PacketMovement(
+  movements.push(new PacketMovementDto(
     2,
     packet,
     new Date(2022,11,24,9,30),
@@ -232,7 +231,7 @@ onMounted(() => {
     "Jakob F."
   ));
 
-  movements.push(new PacketMovement(
+  movements.push(new PacketMovementDto(
     3,
     packet,
     new Date(2022,11,24,10,30),
