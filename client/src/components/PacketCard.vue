@@ -33,15 +33,30 @@
         v-model="selectedAction"
         divided
       >
-        <v-btn value="moveIn" :disabled="packet.location.length > 0">
+        <v-btn
+          value="moveIn"
+          :disabled="packet.location.length > 0"
+          variant="outlined"
+          color="primary"
+        >
           <span class="hidden-sm-and-down">Einlagern</span>
           <v-icon end>mdi-arrow-right</v-icon>
         </v-btn>
-        <v-btn value="moveOut" :disabled="packet.location.length === 0">
+        <v-btn
+          value="moveOut"
+          :disabled="packet.location.length === 0"
+          variant="outlined"
+          color="primary"
+        >
           <span class="hidden-sm-and-down">Auslagern</span>
           <v-icon end>mdi-arrow-left</v-icon>
         </v-btn>
-        <v-btn value="moveLocation" :disabled="packet.location.length === 0">
+        <v-btn
+          value="moveLocation"
+          :disabled="packet.location.length === 0"
+          variant="outlined"
+          color="primary"
+        >
           <span class="hidden-sm-and-down">Umlagern</span>
           <v-icon end icon="mdi-sync"></v-icon>
         </v-btn>
