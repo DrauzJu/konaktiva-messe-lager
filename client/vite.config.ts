@@ -26,11 +26,11 @@ export default defineConfig({
     port: 3000,
   },
   optimizeDeps: {
-    include: ["dto"],
+    include: ["messe-lager-dto", "dto"],
   },
   build: {
     commonjsOptions: {
-      include: [/dto/, /node_modules/],
+      include: [/messe-lager-dto/, /dto/, /node_modules/],
     },
   },
 });
