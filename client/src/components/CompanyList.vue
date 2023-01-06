@@ -1,4 +1,5 @@
 <template>
+  <v-overlay :model-value="loading" class="align-center justify-center"></v-overlay>
   <v-container class="fill-height">
     <v-row
       no-gutters
@@ -32,21 +33,33 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, reactive, ref } from 'vue';
+import axios from 'axios';
 import { Header, Item } from 'vue3-easy-data-table';
 
 const rowsPerPage = 10000; // "disable" pagination
-
 const headers: Header[] = [
-  { text: "ID", value: "ID", sortable: true },
+  { text: "ID", value: "id", sortable: true },
   { text: "Tag", value: "day", sortable: false },
-  { text: "Unternehmen", value: "company", sortable: true },
+  { text: "Unternehmen", value: "name", sortable: true },
 ];
 
-const items: Item[] = [
-  { "ID": 101, "day": "Dienstag", "company": "Julian AG"},
-  { "ID": 523, "day": "Dienstag", "company": "Laura AG"},
-  { "ID": 549, "day": "Mittwoch", "company": "Ju AG"},
-];
+const loading = ref(false);
+const items = reactive<Item[]>([]);
+
+onMounted(async () => {
+  loading.value = true;
+  items.length = 0;
+
+  try {
+    items.length = 0;
+    items.push(await axios.get('/api/company'));
+  } catch(e) {
+    alert(e);
+  } finally {
+    loading.value = false;
+  }
+})
 </script>
 
 <style>
