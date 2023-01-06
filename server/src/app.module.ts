@@ -5,6 +5,8 @@ import { PacketModule } from './packet/packet.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import getDBConfiguration from './db.conf';
+import { PacketMovementModule } from './packet-movement/packet-movement.module';
+import { CompanyModule } from './company/company.module';
 
 @Module({
   imports: [
@@ -17,7 +19,9 @@ import getDBConfiguration from './db.conf';
       imports: [ConfigModule.forRoot()],
       useFactory: (config: ConfigService) => getDBConfiguration(config),
     }),
+    CompanyModule,
     PacketModule,
+    PacketMovementModule,
   ],
   controllers: [],
   providers: [],

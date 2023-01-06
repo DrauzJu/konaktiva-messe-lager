@@ -1,3 +1,4 @@
+import { Packet } from 'src/packet/packet.model';
 import {
   EntitySubscriberInterface,
   EventSubscriber,
@@ -13,7 +14,12 @@ export class PacketMovementSubscriber
     return PacketMovement;
   }
 
-  afterInsert(event: InsertEvent<PacketMovement>) {
-    console.log(`AFTER ENTITY INSERTED: `, event.entity);
+  async afterInsert(event: InsertEvent<PacketMovement>) {
+    const packetRepository = event.manager.getRepository(Packet);
+
+    const packet = event.entity.packet;
+    packet.location = event.entity.newLocation;
+
+    await packetRepository.save(packet);
   }
 }

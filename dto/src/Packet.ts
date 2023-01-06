@@ -1,22 +1,21 @@
-import { IsOptional } from 'class-validator';
+import { IsInt, IsOptional } from "class-validator";
+import { Company } from './Company';
+import { PacketMovement } from './PacketMovement';
 
-export class PacketDto {
+export type Packet = {
+  id: number;
+  company: Company;
+  location: string;
+}
+
+export type PacketDetailed = Packet & {
+  movements: PacketMovement[];
+};
+
+export class CreatePacketParams {
+  @IsInt()
+  public companyId!: number;
+
   @IsOptional()
-  public number?: number;
-
-  public day: string;
-  public company: string;
-  public location: string;
-
-  public constructor(
-    number: number,
-    day: string,
-    company: string,
-    location: string,
-  ) {
-    this.number = number;
-    this.day = day;
-    this.company = company;
-    this.location = location;
-  }
+  public location: string | undefined;
 }

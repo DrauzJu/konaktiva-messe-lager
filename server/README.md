@@ -57,5 +57,5 @@ yarn start:dev
 # Run temporary test DB
 
 ```bash
-docker run --rm -p 3306:3306 -e MYSQL_DATABASE=db1 -e MYSQL_ROOT_PASSWORD=abc123 mysql:8
+docker run -d --rm -p 3306:3306 -e MYSQL_DATABASE=db1 -e MYSQL_ROOT_PASSWORD=abc123 mysql:8
 ```

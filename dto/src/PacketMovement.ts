@@ -1,5 +1,5 @@
-import { IsOptional } from "class-validator";
-import { PacketDto } from "./Packet";
+import { IsDateString, IsEnum, IsNumber, IsOptional } from "class-validator";
+import { Packet } from "./Packet";
 
 export enum PacketMovementType {
   IN,
@@ -7,32 +7,32 @@ export enum PacketMovementType {
   LOCATION_CHANGE
 };
 
-export class PacketMovementDto {
+export type PacketMovement = {
+  id: number;
+  packet: Packet;
+  time: Date;
+  type: PacketMovementType;
+  oldLocation: string;
+  newLocation: string;
+  actor: string;
+};
+
+export class CreatePacketMovementParams {
+  @IsNumber()
+  public packetId!: number;
+
+  @IsDateString()
+  public time!: Date;
+
+  @IsEnum(PacketMovementType)
+  public type!: PacketMovementType;
+
   @IsOptional()
-  public ID: number;
+  public oldLocation: string | undefined;
 
-  public packet: PacketDto;
-  public time: Date;
-  public type: PacketMovementType;
-  public oldLocation: string;
-  public newLocation: string;
-  public actor: string;
+  @IsOptional()
+  public newLocation: string | undefined;
 
-  public constructor(
-    ID: number,
-    packet: PacketDto,
-    time: Date,
-    type: PacketMovementType,
-    oldLocation: string,
-    newLocation: string,
-    actor: string,
-  ) {
-    this.ID = ID;
-    this.packet = packet;
-    this.time = time;
-    this.type = type;
-    this.oldLocation = oldLocation;
-    this.newLocation = newLocation;
-    this.actor = actor;
-  }
+  @IsOptional()
+  public actor: string | undefined;
 };
