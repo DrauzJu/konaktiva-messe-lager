@@ -9,8 +9,8 @@
       <v-container class="pt-0 pb-0">
         <v-row align="center">
           <v-col cols="8">
-            <div>Unternehmen: {{  packet.company }}</div>
-            <div>Tag: {{  packet.day }}</div>
+            <div>Unternehmen: {{  packet.company.name }}</div>
+            <div>Tag: {{  packet.company.day }}</div>
           </v-col>
           <v-spacer></v-spacer>
           <v-col cols="2">Lagerplatz:</v-col>
@@ -35,7 +35,7 @@
       >
         <v-btn
           value="moveIn"
-          :disabled="packet.location.length > 0"
+          :disabled="packet.location !== null && packet.location.length > 0"
           variant="outlined"
           color="primary"
         >
@@ -44,7 +44,7 @@
         </v-btn>
         <v-btn
           value="moveOut"
-          :disabled="packet.location.length === 0"
+          :disabled="packet.location === null || packet.location.length === 0"
           variant="outlined"
           color="primary"
         >
@@ -53,7 +53,7 @@
         </v-btn>
         <v-btn
           value="moveLocation"
-          :disabled="packet.location.length === 0"
+          :disabled="packet.location === null || packet.location.length === 0"
           variant="outlined"
           color="primary"
         >
@@ -73,12 +73,14 @@
                 :disabled="loading"
                 persistent-hint
                 clearable
+                v-model="actionMoveInLocation"
               ></v-text-field>
               <v-text-field
                 label="Pate"
                 :disabled="loading"
                 persistent-hint
                 clearable
+                v-model="actionMoveInActor"
               ></v-text-field>
             </v-form>
           </v-col>
@@ -94,6 +96,7 @@
                 :disabled="loading"
                 persistent-hint
                 clearable
+                v-model="actionMoveOutActor"
               ></v-text-field>
             </v-form>
           </v-col>
@@ -109,12 +112,13 @@
                 :disabled="loading"
                 persistent-hint
                 clearable
+                v-model="actionChangeLocationLocation"
               ></v-text-field>
             </v-form>
           </v-col>
         </v-row>
       </v-container>
-      <v-expansion-panels class="mt-8">
+      <v-expansion-panels class="mt-8" multiple>
         <v-expansion-panel title="Details">
           <v-expansion-panel-text>Spediteur, ...</v-expansion-panel-text>
         </v-expansion-panel>
@@ -125,13 +129,13 @@
               truncate-line="start"
             >
               <v-timeline-item
-                v-for="item in movements"
-                :key="item.ID"
+                v-for="item in packet.movements"
+                :key="item.id"
                 :dot-color="getMovementColor(item)"
                 size="small"
               >
                 <template v-slot:opposite>
-                  <div>{{ item.time.toISOString() }}</div>
+                  <div>{{ item.time }}</div>
                 </template>
 
                 <div>
@@ -168,7 +172,7 @@
         color="success"
         variant="outlined"
         :disabled="loading || !selectedAction || selectedAction.length === 0"
-        @click="emit('update:parentDialogActive', false)"
+        @click="save"
       >{{ saveButtonText }}</v-btn>
     </v-card-actions>
   </v-card>
@@ -176,19 +180,32 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref, computed } from 'vue';
-import { PacketDto, PacketMovementDto, PacketMovementType } from 'messe-lager-dto';
+import { CreatePacketMovementParams, PacketDetailed, PacketMovement, PacketMovementType } from 'messe-lager-dto';
+import axios from 'axios';
 
 const props = defineProps({
   parentDialogActive: { type: Boolean, required: true },
   packetID: { type: Number, required: true }
 });
 
-const emit = defineEmits(['update:parentDialogActive'])
+const emit = defineEmits(['update:parentDialogActive', 'packetSaved'])
 
-const packet: PacketDto = reactive(new PacketDto(props.packetID, "", "", ""));
 const loading = ref(false);
 const selectedAction = ref<string>();
-const movements: PacketMovementDto[] = reactive<PacketMovementDto[]>([]);
+const actionMoveInActor = ref<string>();
+const actionMoveInLocation = ref<string>();
+const actionMoveOutActor = ref<string>();
+const actionChangeLocationLocation = ref<string>();
+const packet: PacketDetailed = reactive({
+  id: 0,
+  company: {
+    id: 0,
+    day: "",
+    name: ""
+  },
+  location: "",
+  movements: [],
+});
 
 const saveButtonText = computed(() => {
   if(!selectedAction.value) {
@@ -203,7 +220,7 @@ const saveButtonText = computed(() => {
   }
 });
 
-const getMovementColor = (movement: PacketMovementDto) => {
+const getMovementColor = (movement: PacketMovement) => {
   switch(movement.type) {
     case PacketMovementType.IN: return "success";
     case PacketMovementType.OUT: return "error";
@@ -211,60 +228,82 @@ const getMovementColor = (movement: PacketMovementDto) => {
   }
 }
 
-onMounted(() => {
-  packet.company = "Bosch Rexroth";
-  packet.day = "Mittwoch";
-  packet.location = "A7";
+const save = async () => {
+  let data: CreatePacketMovementParams
 
-  movements.push(new PacketMovementDto(
-    0,
-    packet,
-    new Date(2022,11,24,8,20),
-    PacketMovementType.IN,
-    "",
-    "A7",
-    "Jakob F."
-  ));
+  switch(selectedAction.value) {
+    case "moveIn":
+      data = {
+        time: new Date(),
+        type: PacketMovementType.IN,
+        packetId: props.packetID,
+        oldLocation: undefined,
+        newLocation: actionMoveInLocation.value,
+        actor: actionMoveInActor.value,
+      };
 
-  movements.push(new PacketMovementDto(
-    1,
-    packet,
-    new Date(2022,11,24,9,20),
-    PacketMovementType.OUT,
-    "A7",
-    "",
-    "Jakob F."
-  ));
+      break;
+    case "moveOut":
+      data = {
+        time: new Date(),
+        type: PacketMovementType.OUT,
+        packetId: props.packetID,
+        oldLocation: packet.location,
+        newLocation: undefined,
+        actor: actionMoveOutActor.value,
+      };
 
-  movements.push(new PacketMovementDto(
-    2,
-    packet,
-    new Date(2022,11,24,9,30),
-    PacketMovementType.IN,
-    "",
-    "A8",
-    "Jakob F."
-  ));
+      break;
+    case "moveLocation":
+      data = {
+        time: new Date(),
+        type: PacketMovementType.LOCATION_CHANGE,
+        packetId: props.packetID,
+        oldLocation: packet.location,
+        newLocation: actionChangeLocationLocation.value,
+        actor: undefined,
+      };
 
-  movements.push(new PacketMovementDto(
-    3,
-    packet,
-    new Date(2022,11,24,10,30),
-    PacketMovementType.LOCATION_CHANGE,
-    "A8",
-    "A7",
-    "Jakob F."
-  ));
+      break;
+    default: return;
+  }
 
+  try {
+    await axios.post('/api/packetMovement', data);
+  } catch(e) {
+    alert(e);
+    return;
+  }
+
+  emit('update:parentDialogActive', false)
+  emit('packetSaved');
+};
+
+onMounted(async () => {
   loading.value = true;
-  setTimeout(() => loading.value = false, 1000);
+
+  try {
+    const response = await axios.get(`/api/packet/${props.packetID}`);
+    Object.assign(packet, response.data as PacketDetailed);
+  } catch(e) {
+    alert(e);
+  }
 
   // Default actions
-  if(packet.location.length === 0) {
+  if(packet.location === null || packet.location.length === 0) {
     selectedAction.value = "moveIn";
+
+    try {
+      const response = await axios.get(`/api/company/${packet.company.id}/mainLocation`);
+      actionMoveInLocation.value = response.data.location;
+    } catch(e) {
+      alert(e);
+    }
   } else {
     selectedAction.value = "moveOut";
   }
+
+  loading.value = false;
 });
 
 </script>

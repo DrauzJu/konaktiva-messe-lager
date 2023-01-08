@@ -1,5 +1,11 @@
 Requires: yarn, node
 
+# Tech-Stack
+
+- Server: Node + Typescript + NestJS
+- Client: Typescript + Vue 3 + Vuetify Next
+- Database: MySQL
+
 # Install and build all
 
 ```bash

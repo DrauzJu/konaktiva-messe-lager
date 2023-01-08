@@ -4,6 +4,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
@@ -18,6 +19,13 @@ export class CompanyController {
   @Get()
   public async getCompanys(): Promise<Company[]> {
     return this.companyService.getCompanys();
+  }
+
+  @Get(':id/mainLocation')
+  public async getMainLocation(
+    @Param('id') id: number,
+  ): Promise<{ location: string }> {
+    return this.companyService.getMainLocation(id);
   }
 
   @Post()

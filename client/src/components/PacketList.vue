@@ -54,7 +54,10 @@
     min-width="450px"
     scrollable
   >
-    <NewPacketCard v-model:parent-dialog-active="newPacketDialogVisible"/>
+    <NewPacketCard
+      v-model:parent-dialog-active="newPacketDialogVisible"
+      @new-packet-saved="loadPackets"
+    />
   </v-dialog>
 
   <v-dialog
@@ -63,15 +66,21 @@
     min-width="450px"
     scrollable
   >
-    <PacketCard v-model:parentDialogActive="packetDialogVisible" :packetID="selectedPacket"/>
+    <PacketCard
+      v-model:parentDialogActive="packetDialogVisible"
+      :packetID="selectedPacket"
+      @packet-saved="loadPackets"
+    />
   </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { ClickRowArgument, Header, Item } from 'vue3-easy-data-table';
 import NewPacketCard from '@/components/NewPacketCard.vue';
 import PacketCard from '@/components/PacketCard.vue';
+import axios from 'axios';
+import { Packet } from 'messe-lager-dto';
 
 const rowsPerPage = 10000; // "disable" pagination
 const searchField = ["number", "company", "location"];
@@ -80,26 +89,41 @@ const searchValue = ref("");
 const newPacketDialogVisible = ref(false);
 const packetDialogVisible = ref(false);
 const selectedPacket = ref(0);
+const items = reactive<Item[]>([]);
 
 const headers: Header[] = [
-  { text: "Number", value: "number", sortable: true },
+  { text: "Number", value: "id", sortable: true },
   { text: "Tag", value: "day", sortable: false },
   { text: "Unternehmen", value: "company", sortable: true },
   { text: "Position", value: "location", sortable: true },
 ];
 
-const items: Item[] = [
-  { "number": 10101, "day": "Dienstag", "company": "Julian AG", "location": "A1" },
-  { "number": 10102, "day": "Dienstag", "company": "Julian AG", "location": "A1" },
-  { "number": 52301, "day": "Dienstag", "company": "Laura AG", "location": "A2" },
-  { "number": 54901, "day": "Mittwoch", "company": "Ju AG", "location": "A3" },
-  { "number": 3340965, "day": "Mittwoch", "company": "Saro AG", "location": "A4" },
-];
-
 const showPacketDetails = (item: ClickRowArgument) => {
-  selectedPacket.value = item.number;
+  selectedPacket.value = item.id;
   packetDialogVisible.value = true;
 };
+
+const loadPackets = async () => {
+  items.length = 0;
+
+  try {
+    items.length = 0;
+    const response = await axios.get('/api/packet');
+
+    (response.data as Packet[]).map((packet: Packet) => {
+      items.push({
+        id: packet.id,
+        location: packet.location,
+        company: packet.company.name,
+        day: packet.company.day,
+      });
+    });
+  } catch(e) {
+    alert(e);
+  }
+};
+
+onMounted(loadPackets);
 
 let scannerInput = "";
 window.onkeypress = (event: KeyboardEvent) => {

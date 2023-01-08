@@ -7,11 +7,11 @@
     >
       <v-col class="mr-2">
         <v-btn
-          color="primary"
+          color="secondary"
           id="btn-new-packet"
-          size="large"
+          @click="generateTest()"
         >
-          Neu
+          Generate test companies
         </v-btn>
       </v-col>
     </v-row>
@@ -47,19 +47,43 @@ const headers: Header[] = [
 const loading = ref(false);
 const items = reactive<Item[]>([]);
 
-onMounted(async () => {
-  loading.value = true;
+const loadCompanies = async () => {
   items.length = 0;
 
   try {
     items.length = 0;
-    items.push(await axios.get('/api/company'));
+    const response = await axios.get('/api/company');
+    items.push(...response.data);
   } catch(e) {
     alert(e);
-  } finally {
-    loading.value = false;
   }
-})
+};
+
+const generateTest = async () => {
+  loading.value = true;
+
+  for(let i = 0; i<10; i++) {
+    try {
+      await axios.post('/api/company', {
+        id: i,
+        name: `Unternehmen ${i + 1}`,
+        day: 'Di'
+      });
+    } catch(e) {
+      alert(e);
+    }
+  }
+
+  await loadCompanies();
+  loading.value = false;
+};
+
+onMounted(async () => {
+  loading.value = true;
+  await loadCompanies();
+  loading.value = false;
+});
+
 </script>
 
 <style>

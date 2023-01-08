@@ -14,7 +14,9 @@
         <v-autocomplete
           label="Unternehmen"
           :items="companies"
-          :rules="[v => !!v || 'Bitte Unternehmen angeben']"
+          item-title="name"
+          item-value="id"
+          :rules="[v => v != null || 'Bitte Unternehmen angeben']"
           v-model="selectedCompany"
           :disabled="loading"
           persistent-hint
@@ -40,40 +42,78 @@
       <v-btn
         color="Secondary"
         :disabled="!validForm || loading"
-        @click="emit('update:parentDialogActive', false)"
+        @click="save"
       >Speichern und Label drucken</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import axios from 'axios';
+import { Company, CreatePacketParams } from 'messe-lager-dto';
+import { onMounted, reactive, ref, watch } from 'vue';
 
 defineProps({
   parentDialogActive: { type: Boolean, required: true },
 });
 
-const emit = defineEmits(['update:parentDialogActive'])
+const emit = defineEmits(['update:parentDialogActive', 'newPacketSaved'])
 
 const loading = ref(false);
 const validForm = ref(false);
-const selectedCompany = ref<string>("");
+const selectedCompany = ref<number>();
 const selectedLocation = ref<string>("");
+const companies = reactive<Company[]>([]);
 
-const companies = ['Company A', 'Company B'];
-
-watch(selectedCompany, (newValue) => {
-  if(newValue === null || newValue.length === 0) {
+watch(selectedCompany, async (newValue) => {
+  if(newValue === null) {
     return;
   }
 
   loading.value = true;
-  setTimeout(() => {
-    selectedLocation.value = 'A' + Math.floor(Math.random() * 10);
+  try {
+    const response = await axios.get(`/api/company/${selectedCompany.value}/mainLocation`);
+    selectedLocation.value = response.data.location;
+  } catch(e) {
+    alert(e);
+  }
 
-    loading.value = false;
-  }, 1000);
+  loading.value = false;
 });
+
+const save = async () => {
+  const data: CreatePacketParams = {
+    companyId: selectedCompany.value!,
+    location: selectedLocation.value,
+  };
+
+  try {
+    await axios.post('/api/packet', data);
+  } catch(e) {
+    alert(e);
+  }
+
+  emit('update:parentDialogActive', false);
+  emit('newPacketSaved');
+};
+
+const loadCompanies = async () => {
+  companies.length = 0;
+
+  try {
+    companies.length = 0;
+    const response = await axios.get('/api/company');
+    companies.push(...response.data);
+  } catch(e) {
+    alert(e);
+  }
+};
+
+onMounted(async () => {
+  loading.value = true;
+  await loadCompanies();
+  loading.value = false;
+})
 
 </script>
 

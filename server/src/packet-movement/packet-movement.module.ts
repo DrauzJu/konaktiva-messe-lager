@@ -9,5 +9,6 @@ import { PacketMovementService } from './packet-movement.service';
   imports: [TypeOrmModule.forFeature([Packet, PacketMovement])],
   controllers: [PacketMovementController],
   providers: [PacketMovementService],
+  exports: [PacketMovementService],
 })
 export class PacketMovementModule {}
