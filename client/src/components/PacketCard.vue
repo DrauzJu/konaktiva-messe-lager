@@ -3,7 +3,7 @@
   <v-card :loading="loading">
     <v-toolbar
       color="primary"
-      :title="'Paket ' + packetID"
+      :title="'Paket #' + packetID"
     ></v-toolbar>
     <v-card-text>
       <v-container class="pt-0 pb-0">

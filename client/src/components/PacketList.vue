@@ -128,7 +128,7 @@ onMounted(loadPackets);
 let scannerInput = "";
 window.onkeypress = (event: KeyboardEvent) => {
   if(event.key == "Enter") {
-    const matchedItems = items.filter(i => i.number === parseInt(scannerInput));
+    const matchedItems = items.filter(i => i.id === parseInt(scannerInput));
 
     if(matchedItems.length == 0) {
       console.log("Packet not found: " + scannerInput);
@@ -137,7 +137,7 @@ window.onkeypress = (event: KeyboardEvent) => {
     }
 
     const item = matchedItems[0];
-    selectedPacket.value = item.number;
+    selectedPacket.value = item.id;
     packetDialogVisible.value = true;
     scannerInput = "";
 
