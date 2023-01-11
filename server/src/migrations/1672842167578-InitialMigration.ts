@@ -14,10 +14,10 @@ export class InitialMigration1672842167578 implements MigrationInterface {
       `CREATE TABLE \`packet\` (\`id\` int NOT NULL AUTO_INCREMENT, \`location\` varchar(255) NULL, \`companyId\` int NOT NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
-      `ALTER TABLE \`packet_movement\` ADD CONSTRAINT \`FK_cf310da3086f267499496871e46\` FOREIGN KEY (\`packetId\`) REFERENCES \`packet\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE \`packet_movement\` ADD CONSTRAINT \`FK_cf310da3086f267499496871e46\` FOREIGN KEY (\`packetId\`) REFERENCES \`packet\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
     );
     await queryRunner.query(
-      `ALTER TABLE \`packet\` ADD CONSTRAINT \`FK_028597e0259980d492eb9be3c56\` FOREIGN KEY (\`companyId\`) REFERENCES \`company\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE \`packet\` ADD CONSTRAINT \`FK_028597e0259980d492eb9be3c56\` FOREIGN KEY (\`companyId\`) REFERENCES \`company\`(\`id\`) ON DELETE NO ACTION ON UPDATE CASCADE`,
     );
   }
 

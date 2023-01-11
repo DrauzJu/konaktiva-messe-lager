@@ -22,6 +22,11 @@ export class PacketService {
     return this.packetRepository.findOne({
       where: { id },
       relations: ['movements'],
+      order: {
+        movements: {
+          time: "ASC"
+        }
+      }
     });
   }
 
