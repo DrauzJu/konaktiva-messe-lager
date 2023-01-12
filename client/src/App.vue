@@ -7,6 +7,7 @@
       density="compact"
     >
       <h1 class="text-h4">konaktiva Lager</h1>
+      <img class="ma-1 ml-3 h-100" src="/favicon.svg"/>
 
       <v-spacer></v-spacer>
 
