@@ -1,16 +1,16 @@
 <template>
-  <v-overlay :model-value="loading" class="align-center justify-center"></v-overlay>
+  <v-overlay
+    :model-value="loading"
+    class="align-center justify-center"
+  ></v-overlay>
   <v-card :loading="loading">
-    <v-toolbar
-      color="primary"
-      :title="'Paket #' + packetID"
-    ></v-toolbar>
+    <v-toolbar color="primary" :title="'Paket #' + packetID"></v-toolbar>
     <v-card-text>
       <v-container class="pt-0 pb-0">
         <v-row align="center">
           <v-col cols="8">
-            <div>Unternehmen: {{  packet.company.name }}</div>
-            <div>Tag: {{  packet.company.day }}</div>
+            <div>Unternehmen: {{ packet.company.name }}</div>
+            <div>Tag: {{ packet.company.day }}</div>
           </v-col>
           <v-spacer></v-spacer>
           <v-col cols="2">Lagerplatz:</v-col>
@@ -23,16 +23,13 @@
               height="100px"
               width="100px"
             >
-            {{  packet.location || "n/a" }}
+              {{ packet.location || "n/a" }}
             </v-sheet>
           </v-col>
         </v-row>
       </v-container>
       <v-divider class="mt-4 mb-4"></v-divider>
-      <v-btn-toggle
-        v-model="selectedAction"
-        divided
-      >
+      <v-btn-toggle v-model="selectedAction" divided>
         <v-btn
           value="moveIn"
           :disabled="packet.location !== null && packet.location.length > 0"
@@ -64,55 +61,46 @@
       <v-container>
         <v-row v-if="selectedAction === 'moveIn'">
           <v-col>
-            <v-form
-              ref="form"
-              lazy-validation
-            >
+            <v-form ref="form" lazy-validation>
               <v-text-field
+                v-model="actionMoveInLocation"
                 label="Lagerplatz"
                 :disabled="loading"
                 persistent-hint
                 clearable
-                v-model="actionMoveInLocation"
               ></v-text-field>
               <v-text-field
+                v-model="actionMoveInActor"
                 label="Pate"
                 :disabled="loading"
                 persistent-hint
                 clearable
-                v-model="actionMoveInActor"
               ></v-text-field>
             </v-form>
           </v-col>
         </v-row>
         <v-row v-if="selectedAction === 'moveOut'">
           <v-col>
-            <v-form
-              ref="form"
-              lazy-validation
-            >
+            <v-form ref="form" lazy-validation>
               <v-text-field
+                v-model="actionMoveOutActor"
                 label="Pate"
                 :disabled="loading"
                 persistent-hint
                 clearable
-                v-model="actionMoveOutActor"
               ></v-text-field>
             </v-form>
           </v-col>
         </v-row>
         <v-row v-if="selectedAction === 'moveLocation'">
           <v-col>
-            <v-form
-              ref="form"
-              lazy-validation
-            >
+            <v-form ref="form" lazy-validation>
               <v-text-field
+                v-model="actionChangeLocationLocation"
                 label="Neuer Lagerplatz"
                 :disabled="loading"
                 persistent-hint
                 clearable
-                v-model="actionChangeLocationLocation"
               ></v-text-field>
             </v-form>
           </v-col>
@@ -124,28 +112,43 @@
         </v-expansion-panel>
         <v-expansion-panel title="Paketbewegungen">
           <v-expansion-panel-text>
-            <v-timeline
-              side="end"
-              truncate-line="start"
-            >
+            <v-timeline side="end" truncate-line="start">
               <v-timeline-item
                 v-for="item in packet.movements"
                 :key="item.id"
                 :dot-color="getMovementColor(item)"
                 size="small"
               >
-                <template v-slot:opposite>
+                <template #opposite>
                   <div>{{ item.time }}</div>
                 </template>
 
                 <div>
-                  <div class="text-h6" v-if="item.type === PacketMovementType.IN">Einlagerung</div>
-                  <div class="text-h6" v-if="item.type === PacketMovementType.OUT">Auslagerung</div>
-                  <div class="text-h6" v-if="item.type === PacketMovementType.LOCATION_CHANGE">Umlagerung</div>
+                  <div
+                    v-if="item.type === PacketMovementType.IN"
+                    class="text-h6"
+                  >
+                    Einlagerung
+                  </div>
+                  <div
+                    v-if="item.type === PacketMovementType.OUT"
+                    class="text-h6"
+                  >
+                    Auslagerung
+                  </div>
+                  <div
+                    v-if="item.type === PacketMovementType.LOCATION_CHANGE"
+                    class="text-h6"
+                  >
+                    Umlagerung
+                  </div>
                   <p>Pate: {{ item.actor }}</p>
-                  <p v-if="item.type === PacketMovementType.IN">Lagerplatz: {{ item.newLocation }}</p>
+                  <p v-if="item.type === PacketMovementType.IN">
+                    Lagerplatz: {{ item.newLocation }}
+                  </p>
                   <p v-if="item.type === PacketMovementType.LOCATION_CHANGE">
-                    Lagerplatz: {{ item.oldLocation }} nach {{ item.newLocation }}
+                    Lagerplatz: {{ item.oldLocation }} nach
+                    {{ item.newLocation }}
                   </p>
                 </div>
               </v-timeline-item>
@@ -160,35 +163,43 @@
         variant="outlined"
         :disabled="loading"
         @click="emit('update:parentDialogActive', false)"
-      >Abbrechen</v-btn>
+        >Abbrechen</v-btn
+      >
       <v-spacer></v-spacer>
       <v-btn
         color="Secondary"
         variant="outlined"
         :disabled="loading"
         @click="emit('update:parentDialogActive', false)"
-      >Etikett drucken</v-btn>
+        >Etikett drucken</v-btn
+      >
       <v-btn
         color="success"
         variant="outlined"
         :disabled="loading || !selectedAction || selectedAction.length === 0"
         @click="save"
-      >{{ saveButtonText }}</v-btn>
+        >{{ saveButtonText }}</v-btn
+      >
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, computed } from 'vue';
-import { CreatePacketMovementParams, PacketDetailed, PacketMovement, PacketMovementType } from 'messe-lager-dto';
-import axios from 'axios';
+import { onMounted, reactive, ref, computed } from "vue";
+import {
+  CreatePacketMovementParams,
+  PacketDetailed,
+  PacketMovement,
+  PacketMovementType,
+} from "messe-lager-dto";
+import axios from "axios";
 
 const props = defineProps({
   parentDialogActive: { type: Boolean, required: true },
-  packetID: { type: Number, required: true }
+  packetID: { type: Number, required: true },
 });
 
-const emit = defineEmits(['update:parentDialogActive', 'packetSaved'])
+const emit = defineEmits(["update:parentDialogActive", "packetSaved"]);
 
 const loading = ref(false);
 const selectedAction = ref<string>();
@@ -201,37 +212,44 @@ const packet: PacketDetailed = reactive({
   company: {
     id: 0,
     day: "",
-    name: ""
+    name: "",
   },
   location: "",
   movements: [],
 });
 
 const saveButtonText = computed(() => {
-  if(!selectedAction.value) {
+  if (!selectedAction.value) {
     return "Speichern";
   }
 
-  switch(selectedAction.value) {
-    case "moveIn": return "Einlagern";
-    case "moveOut": return "Auslagern";
-    case "moveLocation": return "Umlagern";
-    default: return "Speichern";
+  switch (selectedAction.value) {
+    case "moveIn":
+      return "Einlagern";
+    case "moveOut":
+      return "Auslagern";
+    case "moveLocation":
+      return "Umlagern";
+    default:
+      return "Speichern";
   }
 });
 
 const getMovementColor = (movement: PacketMovement) => {
-  switch(movement.type) {
-    case PacketMovementType.IN: return "success";
-    case PacketMovementType.OUT: return "error";
-    case PacketMovementType.LOCATION_CHANGE: return "info";
+  switch (movement.type) {
+    case PacketMovementType.IN:
+      return "success";
+    case PacketMovementType.OUT:
+      return "error";
+    case PacketMovementType.LOCATION_CHANGE:
+      return "info";
   }
-}
+};
 
 const save = async () => {
-  let data: CreatePacketMovementParams
+  let data: CreatePacketMovementParams;
 
-  switch(selectedAction.value) {
+  switch (selectedAction.value) {
     case "moveIn":
       data = {
         time: new Date(),
@@ -265,18 +283,19 @@ const save = async () => {
       };
 
       break;
-    default: return;
+    default:
+      return;
   }
 
   try {
-    await axios.post('/api/packetMovement', data);
-  } catch(e) {
+    await axios.post("/api/packetMovement", data);
+  } catch (e) {
     alert(e);
     return;
   }
 
-  emit('update:parentDialogActive', false)
-  emit('packetSaved');
+  emit("update:parentDialogActive", false);
+  emit("packetSaved");
 };
 
 onMounted(async () => {
@@ -285,19 +304,20 @@ onMounted(async () => {
   try {
     const response = await axios.get(`/api/packet/${props.packetID}`);
     Object.assign(packet, response.data as PacketDetailed);
-  } catch(e) {
+  } catch (e) {
     alert(e);
   }
 
   // Default actions
-  if(packet.location === null || packet.location.length === 0) {
+  if (packet.location === null || packet.location.length === 0) {
     selectedAction.value = "moveIn";
 
-    try {
-      const response = await axios.get(`/api/company/${packet.company.id}/mainLocation`);
-      actionMoveInLocation.value = response.data.location;
-    } catch(e) {
-      alert(e);
+    const lastMovementWithLocation = packet.movements.findLast(
+      (movement) => movement.newLocation !== null
+    );
+
+    if (lastMovementWithLocation) {
+      actionMoveInLocation.value = lastMovementWithLocation.newLocation;
     }
   } else {
     selectedAction.value = "moveOut";
@@ -305,8 +325,6 @@ onMounted(async () => {
 
   loading.value = false;
 });
-
 </script>
 
-<style>
-</style>
+<style></style>

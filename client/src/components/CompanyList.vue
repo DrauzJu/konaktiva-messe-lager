@@ -1,16 +1,12 @@
 <template>
-  <v-overlay :model-value="loading" class="align-center justify-center"></v-overlay>
+  <v-overlay
+    :model-value="loading"
+    class="align-center justify-center"
+  ></v-overlay>
   <v-container class="fill-height">
-    <v-row
-      no-gutters
-      class="align-center"
-    >
+    <v-row no-gutters class="align-center">
       <v-col class="mr-2">
-        <v-btn
-          color="secondary"
-          id="btn-new-packet"
-          @click="generateTest()"
-        >
+        <v-btn id="btn-new-packet" color="secondary" @click="generateTest()">
           Generate test companies
         </v-btn>
       </v-col>
@@ -20,9 +16,9 @@
         <EasyDataTable
           :headers="headers"
           :items="items"
-          hideFooter
+          hide-footer
           alternating
-          :rowsPerPage="rowsPerPage"
+          :rows-per-page="rowsPerPage"
           sort-by="company"
           class="data-table"
         >
@@ -33,9 +29,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
-import axios from 'axios';
-import { Header, Item } from 'vue3-easy-data-table';
+import { onMounted, reactive, ref } from "vue";
+import axios from "axios";
+import { Header, Item } from "vue3-easy-data-table";
 
 const rowsPerPage = 10000; // "disable" pagination
 const headers: Header[] = [
@@ -52,9 +48,9 @@ const loadCompanies = async () => {
 
   try {
     items.length = 0;
-    const response = await axios.get('/api/company');
+    const response = await axios.get("/api/company");
     items.push(...response.data);
-  } catch(e) {
+  } catch (e) {
     alert(e);
   }
 };
@@ -62,14 +58,14 @@ const loadCompanies = async () => {
 const generateTest = async () => {
   loading.value = true;
 
-  for(let i = 0; i<10; i++) {
+  for (let i = 0; i < 10; i++) {
     try {
-      await axios.post('/api/company', {
+      await axios.post("/api/company", {
         id: i,
         name: `Unternehmen ${i + 1}`,
-        day: 'Di'
+        day: "Di",
       });
-    } catch(e) {
+    } catch (e) {
       alert(e);
     }
   }
@@ -83,9 +79,8 @@ onMounted(async () => {
   await loadCompanies();
   loading.value = false;
 });
-
 </script>
 
 <style>
-@import "../assets/tableStyle.css"
+@import "../assets/tableStyle.css";
 </style>

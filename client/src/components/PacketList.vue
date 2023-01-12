@@ -1,24 +1,15 @@
 <template>
   <v-container class="fill-height">
-    <v-row
-      no-gutters
-      class="align-center"
-    >
+    <v-row no-gutters class="align-center">
       <v-col class="mr-2">
-        <v-btn
-          color="primary"
-          id="btn-new-packet"
-          size="large"
-        >
-          Neu
-        </v-btn>
+        <v-btn id="btn-new-packet" color="primary" size="large"> Neu </v-btn>
       </v-col>
       <v-spacer></v-spacer>
       <v-col>
         <v-text-field
+          v-model="searchValue"
           label="Suche"
           hide-details="auto"
-          v-model="searchValue"
           append-inner-icon="mdi-magnify"
           density="comfortable"
         >
@@ -30,26 +21,26 @@
         <EasyDataTable
           :headers="headers"
           :items="items"
-          hideFooter
+          hide-footer
           alternating
-          :rowsPerPage="rowsPerPage"
+          :rows-per-page="rowsPerPage"
           :search-field="searchField"
           :search-value="searchValue"
           sort-by="company"
           class="data-table"
           @click-row="showPacketDetails"
         >
-        <template #item-number="{ number }">
-          <div class="font-weight-bold">{{ number }}</div>
-        </template>
+          <template #item-number="{ number }">
+            <div class="font-weight-bold">{{ number }}</div>
+          </template>
         </EasyDataTable>
       </v-col>
     </v-row>
   </v-container>
 
   <v-dialog
-    activator="#btn-new-packet"
     v-model="newPacketDialogVisible"
+    activator="#btn-new-packet"
     max-width="700px"
     min-width="450px"
     scrollable
@@ -68,19 +59,19 @@
   >
     <PacketCard
       v-model:parentDialogActive="packetDialogVisible"
-      :packetID="selectedPacket"
+      :packet-i-d="selectedPacket"
       @packet-saved="loadPackets"
     />
   </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
-import { ClickRowArgument, Header, Item } from 'vue3-easy-data-table';
-import NewPacketCard from '@/components/NewPacketCard.vue';
-import PacketCard from '@/components/PacketCard.vue';
-import axios from 'axios';
-import { Packet } from 'messe-lager-dto';
+import { onMounted, reactive, ref } from "vue";
+import { ClickRowArgument, Header, Item } from "vue3-easy-data-table";
+import NewPacketCard from "@/components/NewPacketCard.vue";
+import PacketCard from "@/components/PacketCard.vue";
+import axios from "axios";
+import { Packet } from "messe-lager-dto";
 
 const rowsPerPage = 10000; // "disable" pagination
 const searchField = ["number", "company", "location"];
@@ -108,7 +99,7 @@ const loadPackets = async () => {
 
   try {
     items.length = 0;
-    const response = await axios.get('/api/packet');
+    const response = await axios.get("/api/packet");
 
     (response.data as Packet[]).map((packet: Packet) => {
       items.push({
@@ -118,7 +109,7 @@ const loadPackets = async () => {
         day: packet.company.day,
       });
     });
-  } catch(e) {
+  } catch (e) {
     alert(e);
   }
 };
@@ -127,10 +118,10 @@ onMounted(loadPackets);
 
 let scannerInput = "";
 window.onkeypress = (event: KeyboardEvent) => {
-  if(event.key == "Enter") {
-    const matchedItems = items.filter(i => i.id === parseInt(scannerInput));
+  if (event.key == "Enter") {
+    const matchedItems = items.filter((i) => i.id === parseInt(scannerInput));
 
-    if(matchedItems.length == 0) {
+    if (matchedItems.length == 0) {
       console.log("Packet not found: " + scannerInput);
       scannerInput = "";
       return;
@@ -142,13 +133,12 @@ window.onkeypress = (event: KeyboardEvent) => {
     scannerInput = "";
 
     event.preventDefault();
-  } else if(!isNaN(parseInt(event.key))) {
+  } else if (!isNaN(parseInt(event.key))) {
     scannerInput = scannerInput + event.key;
   }
 };
-
 </script>
 
 <style>
-@import "../assets/tableStyle.css"
+@import "../assets/tableStyle.css";
 </style>

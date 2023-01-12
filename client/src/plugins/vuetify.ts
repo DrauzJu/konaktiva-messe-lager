@@ -5,12 +5,12 @@
  */
 
 // Styles
-import '@mdi/font/css/materialdesignicons.css';
-import 'vuetify/styles';
-import { aliases, mdi } from 'vuetify/iconsets/mdi';
+import "@mdi/font/css/materialdesignicons.css";
+import "vuetify/styles";
+import { aliases, mdi } from "vuetify/iconsets/mdi";
 
 // Composables
-import { createVuetify } from 'vuetify';
+import { createVuetify } from "vuetify";
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
@@ -18,14 +18,14 @@ export default createVuetify({
     themes: {
       light: {
         colors: {
-          primary: '#e6007e',
-          secondary: '#5CBBF6',
+          primary: "#e6007e",
+          secondary: "#5CBBF6",
         },
       },
     },
   },
   icons: {
-    defaultSet: 'mdi',
+    defaultSet: "mdi",
     aliases,
     sets: {
       mdi,

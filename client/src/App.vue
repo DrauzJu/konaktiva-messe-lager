@@ -1,27 +1,15 @@
 <template>
   <v-app id="appId">
-    <v-app-bar
-      class="px-3"
-      color="white"
-      flat
-      density="compact"
-    >
+    <v-app-bar class="px-3" color="white" flat density="compact">
       <h1 class="text-h4">konaktiva Lager</h1>
-      <img class="ma-1 ml-3 h-100" src="/favicon.svg"/>
+      <img class="ma-1 ml-3 h-100" src="/favicon.svg" />
 
       <v-spacer></v-spacer>
 
-      <v-tabs
-        centered
-        color="primary"
-      >
-        <v-tab key="packets" to="/packetList">
-          Pakete
-        </v-tab>
+      <v-tabs centered color="primary">
+        <v-tab key="packets" to="/packetList">Pakete</v-tab>
         <v-divider vertical></v-divider>
-        <v-tab key="companies" to="/companyList">
-          Unternehmen
-        </v-tab>
+        <v-tab key="companies" to="/companyList">Unternehmen</v-tab>
       </v-tabs>
     </v-app-bar>
 
@@ -31,8 +19,7 @@
   </v-app>
 </template>
 
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <style>
 h1 {

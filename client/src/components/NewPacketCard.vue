@@ -1,32 +1,28 @@
 <template>
-  <v-overlay :model-value="loading" class="align-center justify-center"></v-overlay>
+  <v-overlay
+    :model-value="loading"
+    class="align-center justify-center"
+  ></v-overlay>
   <v-card :loading="loading">
-    <v-toolbar
-      color="primary"
-      title="Neues Paket"
-    ></v-toolbar>
+    <v-toolbar color="primary" title="Neues Paket"></v-toolbar>
     <v-card-text>
-      <v-form
-        ref="form"
-        v-model="validForm"
-        lazy-validation
-      >
+      <v-form ref="form" v-model="validForm" lazy-validation>
         <v-autocomplete
+          v-model="selectedCompany"
           label="Unternehmen"
           :items="companies"
           item-title="name"
           item-value="id"
-          :rules="[v => v != null || 'Bitte Unternehmen angeben']"
-          v-model="selectedCompany"
+          :rules="[(v) => v != null || 'Bitte Unternehmen angeben']"
           :disabled="loading"
           persistent-hint
           clearable
         ></v-autocomplete>
         <v-divider></v-divider>
         <v-text-field
-          label="Lagerplatz"
-          :rules="[v => !!v || 'Bitte Lagerplatz angeben']"
           v-model="selectedLocation"
+          label="Lagerplatz"
+          :rules="[(v) => !!v || 'Bitte Lagerplatz angeben']"
           :disabled="loading"
           persistent-hint
           clearable
@@ -34,30 +30,27 @@
       </v-form>
     </v-card-text>
     <v-card-actions>
-      <v-btn
-        color="error"
-        @click="emit('update:parentDialogActive', false)"
-      >Abbrechen</v-btn>
+      <v-btn color="error" @click="emit('update:parentDialogActive', false)"
+        >Abbrechen</v-btn
+      >
       <v-spacer></v-spacer>
-      <v-btn
-        color="Secondary"
-        :disabled="!validForm || loading"
-        @click="save"
-      >Speichern und Label drucken</v-btn>
+      <v-btn color="Secondary" :disabled="!validForm || loading" @click="save"
+        >Speichern und Label drucken</v-btn
+      >
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import axios from 'axios';
-import { Company, CreatePacketParams } from 'messe-lager-dto';
-import { onMounted, reactive, ref, watch } from 'vue';
+import axios from "axios";
+import { Company, CreatePacketParams } from "messe-lager-dto";
+import { onMounted, reactive, ref, watch } from "vue";
 
 defineProps({
   parentDialogActive: { type: Boolean, required: true },
 });
 
-const emit = defineEmits(['update:parentDialogActive', 'newPacketSaved'])
+const emit = defineEmits(["update:parentDialogActive", "newPacketSaved"]);
 
 const loading = ref(false);
 const validForm = ref(false);
@@ -66,15 +59,17 @@ const selectedLocation = ref<string>("");
 const companies = reactive<Company[]>([]);
 
 watch(selectedCompany, async (newValue) => {
-  if(newValue === null) {
+  if (newValue === null) {
     return;
   }
 
   loading.value = true;
   try {
-    const response = await axios.get(`/api/company/${selectedCompany.value}/mainLocation`);
+    const response = await axios.get(
+      `/api/company/${selectedCompany.value}/mainLocation`
+    );
     selectedLocation.value = response.data.location;
-  } catch(e) {
+  } catch (e) {
     alert(e);
   }
 
@@ -88,13 +83,13 @@ const save = async () => {
   };
 
   try {
-    await axios.post('/api/packet', data);
-  } catch(e) {
+    await axios.post("/api/packet", data);
+  } catch (e) {
     alert(e);
   }
 
-  emit('update:parentDialogActive', false);
-  emit('newPacketSaved');
+  emit("update:parentDialogActive", false);
+  emit("newPacketSaved");
 };
 
 const loadCompanies = async () => {
@@ -102,9 +97,9 @@ const loadCompanies = async () => {
 
   try {
     companies.length = 0;
-    const response = await axios.get('/api/company');
+    const response = await axios.get("/api/company");
     companies.push(...response.data);
-  } catch(e) {
+  } catch (e) {
     alert(e);
   }
 };
@@ -113,10 +108,7 @@ onMounted(async () => {
   loading.value = true;
   await loadCompanies();
   loading.value = false;
-})
-
+});
 </script>
 
-<style>
-
-</style>
+<style></style>
