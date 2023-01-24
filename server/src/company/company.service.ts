@@ -15,7 +15,9 @@ export class CompanyService {
   ) {}
 
   public async getCompanys(): Promise<Company[]> {
-    return this.companyRepository.find();
+    return this.companyRepository.find({
+      relations: ['packets'],
+    });
   }
 
   public async getMainLocation(id: number): Promise<{ location: string }> {
@@ -31,14 +33,10 @@ export class CompanyService {
       .getRawMany();
 
     if (locationCounts.length === 0) {
-      return {
-        location: '',
-      };
+      return { location: '' };
     }
 
-    return {
-      location: locationCounts[0].location,
-    };
+    return { location: locationCounts[0].location };
   }
 
   public async createCompany(data: CreateCompanyParams): Promise<Company> {

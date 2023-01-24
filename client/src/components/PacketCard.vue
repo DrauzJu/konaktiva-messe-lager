@@ -10,6 +10,7 @@
         <v-row align="center">
           <v-col cols="8">
             <div>Unternehmen: {{ packet.company.name }}</div>
+            <div>Stand: {{ packet.company.booth }}</div>
             <div>Tag: {{ packet.company.day }}</div>
           </v-col>
           <v-spacer></v-spacer>
@@ -170,7 +171,7 @@
         color="Secondary"
         variant="outlined"
         :disabled="loading"
-        @click="emit('update:parentDialogActive', false)"
+        @click="printLabelWrapped()"
         >Etikett drucken</v-btn
       >
       <v-btn
@@ -193,6 +194,7 @@ import {
   PacketMovementType,
 } from "messe-lager-dto";
 import axios from "axios";
+import printLabel from "../dymo/print";
 
 const props = defineProps({
   parentDialogActive: { type: Boolean, required: true },
@@ -213,6 +215,8 @@ const packet: PacketDetailed = reactive({
     id: 0,
     day: "",
     name: "",
+    booth: "",
+    packets: [],
   },
   location: "",
   movements: [],
@@ -243,6 +247,17 @@ const getMovementColor = (movement: PacketMovement) => {
       return "error";
     case PacketMovementType.LOCATION_CHANGE:
       return "info";
+  }
+};
+
+const printLabelWrapped = async () => {
+  try {
+    loading.value = true;
+    await printLabel(packet.id, packet.company.name);
+  } catch (e) {
+    alert("Error while printing label!");
+  } finally {
+    loading.value = false;
   }
 };
 

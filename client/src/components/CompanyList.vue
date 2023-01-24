@@ -22,6 +22,16 @@
           sort-by="company"
           class="data-table"
         >
+          <template #item-packetsNotInWarehouse="{ packetsNotInWarehouse }">
+            <div>
+              {{ packetsNotInWarehouse }}
+              <v-icon
+                v-if="packetsNotInWarehouse > 0"
+                end
+                icon="mdi-alert"
+              ></v-icon>
+            </div>
+          </template>
         </EasyDataTable>
       </v-col>
     </v-row>
@@ -38,6 +48,9 @@ const headers: Header[] = [
   { text: "ID", value: "id", sortable: true },
   { text: "Tag", value: "day", sortable: false },
   { text: "Unternehmen", value: "name", sortable: true },
+  { text: "Stand", value: "booth", sortable: true },
+  { text: "Anzahl Pakete", value: "totalPackets" },
+  { text: "Pakete NICHT im Lager", value: "packetsNotInWarehouse" },
 ];
 
 const loading = ref(false);

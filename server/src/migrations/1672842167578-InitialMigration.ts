@@ -19,6 +19,9 @@ export class InitialMigration1672842167578 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE \`packet\` ADD CONSTRAINT \`FK_028597e0259980d492eb9be3c56\` FOREIGN KEY (\`companyId\`) REFERENCES \`company\`(\`id\`) ON DELETE NO ACTION ON UPDATE CASCADE`,
     );
+
+    // To ensure we only have 4-digit packet numbers
+    await queryRunner.query(`ALTER TABLE \`packet\` AUTO_INCREMENT=1001;`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

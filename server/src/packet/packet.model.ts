@@ -1,4 +1,3 @@
-import { CreatePacketParams } from 'messe-lager-dto/dist/Packet';
 import { Company } from 'src/company/company.model';
 import { PacketMovement } from 'src/packet-movement/packet-movement.model';
 import {

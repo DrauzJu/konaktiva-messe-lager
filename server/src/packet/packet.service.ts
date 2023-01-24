@@ -24,9 +24,9 @@ export class PacketService {
       relations: ['movements'],
       order: {
         movements: {
-          time: "ASC"
-        }
-      }
+          time: 'ASC',
+        },
+      },
     });
   }
 
@@ -44,6 +44,6 @@ export class PacketService {
       packetId: newPacket.id,
     });
 
-    return newPacket;
+    return this.packetRepository.findOneOrFail({ where: { id: newPacket.id } });
   }
 }

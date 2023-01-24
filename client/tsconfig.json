@@ -20,7 +20,8 @@
     },
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "typeRoots": ["src/env.d.ts"]
   },
-  "include": ["src", "vite.config.ts"],
+  "include": ["src/env.d.ts", "src", "vite.config.ts"],
   "exclude": ["node_modules"]
 }

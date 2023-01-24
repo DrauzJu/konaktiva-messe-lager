@@ -43,8 +43,9 @@
 
 <script setup lang="ts">
 import axios from "axios";
-import { Company, CreatePacketParams } from "messe-lager-dto";
+import { Company, CreatePacketParams, Packet } from "messe-lager-dto";
 import { onMounted, reactive, ref, watch } from "vue";
+import printLabel from "../dymo/print";
 
 defineProps({
   parentDialogActive: { type: Boolean, required: true },
@@ -83,7 +84,10 @@ const save = async () => {
   };
 
   try {
-    await axios.post("/api/packet", data);
+    const response = await axios.post("/api/packet", data);
+    const newPacket = response.data as Packet;
+
+    await printLabel(newPacket.id, newPacket.company.name);
   } catch (e) {
     alert(e);
   }

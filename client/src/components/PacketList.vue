@@ -8,7 +8,7 @@
       <v-col>
         <v-text-field
           v-model="searchValue"
-          label="Suche"
+          label="Suche (Stand, Lagerplatz, Unternehmen, ...)"
           hide-details="auto"
           append-inner-icon="mdi-magnify"
           density="comfortable"
@@ -30,8 +30,8 @@
           class="data-table"
           @click-row="showPacketDetails"
         >
-          <template #item-number="{ number }">
-            <div class="font-weight-bold">{{ number }}</div>
+          <template #item-id="{ id }">
+            <div class="font-weight-bold">{{ id }}</div>
           </template>
         </EasyDataTable>
       </v-col>
@@ -105,7 +105,7 @@ const loadPackets = async () => {
       items.push({
         id: packet.id,
         location: packet.location,
-        company: packet.company.name,
+        company: `${packet.company.name} (Stand ${packet.company.booth})`,
         day: packet.company.day,
       });
     });

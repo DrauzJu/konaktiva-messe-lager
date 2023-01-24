@@ -1,9 +1,14 @@
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Packet } from "./Packet";
 
 export type Company = {
   id: number;
   name: string;
   day: string;
+  booth: string;
+  packets: Packet[];
+  totalPackets?: number;
+  packetsNotInWarehouse?: number;
 };
 
 export class CreateCompanyParams {
@@ -17,4 +22,8 @@ export class CreateCompanyParams {
   @IsString()
   @IsNotEmpty()
   public day!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  public booth!: string;
 };
