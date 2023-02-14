@@ -14,3 +14,9 @@ yarn workspaces run build
 ```
 
 See workspaces `dto`, `server` and `client` for details
+
+# Read-Only Setup
+
+In server `.env`, set `READ_ONLY_ACCESS=true`. This will block all requests with HTTP method not equals to `GET`.
+
+Then, two instances can be deployed.

@@ -7,9 +7,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import getDBConfiguration from './db.conf';
 import { PacketMovementModule } from './packet-movement/packet-movement.module';
 import { CompanyModule } from './company/company.module';
+import { APP_GUARD } from '@nestjs/core';
+import { ReadOnlyGuard } from './read-only-guard';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'client', 'dist'),
       serveRoot: '/',
@@ -24,6 +27,12 @@ import { CompanyModule } from './company/company.module';
     PacketMovementModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      inject: [ConfigService],
+      provide: APP_GUARD,
+      useFactory: (config: ConfigService) => new ReadOnlyGuard(config),
+    },
+  ],
 })
 export class AppModule {}
