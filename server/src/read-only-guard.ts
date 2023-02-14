@@ -25,6 +25,6 @@ export class ReadOnlyGuard implements CanActivate {
       return true;
     }
 
-    return !this.configService.getOrThrow<boolean>('READ_ONLY_ACCESS');
+    return this.configService.getOrThrow('READ_ONLY_ACCESS') !== 'true';
   }
 }
