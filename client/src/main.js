@@ -9,11 +9,11 @@ import "vue3-easy-data-table/dist/style.css";
 const app = createApp(App);
 app.component("EasyDataTable", Vue3EasyDataTable);
 const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [
-        { path: "/packetList", component: PacketList },
-        { path: "/companyList", component: CompanyList },
-    ],
+  history: createWebHashHistory(),
+  routes: [
+    { path: "/packetList", component: PacketList },
+    { path: "/companyList", component: CompanyList },
+  ],
 });
 app.use(router);
 registerPlugins(app);

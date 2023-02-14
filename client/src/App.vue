@@ -2,7 +2,7 @@
   <v-app id="appId">
     <v-app-bar class="px-3" color="white" flat density="compact">
       <h1 class="text-h4">konaktiva Lager</h1>
-      <img class="ma-1 ml-3 h-100" src="/favicon.svg" />
+      <img class="ma-1 ml-3 h-100 header-logo" src="/favicon.svg" />
 
       <v-spacer></v-spacer>
 
@@ -24,5 +24,11 @@
 <style>
 h1 {
   color: #e6007e;
+}
+
+@media screen and (max-width: 700px) {
+  .header-logo {
+    display: none;
+  }
 }
 </style>

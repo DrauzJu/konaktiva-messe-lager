@@ -27,9 +27,12 @@ export class Company {
       return;
     }
 
-    this.totalPackets = this.packets.length;
+    this.totalPackets = this.packets.filter(
+      (packet) => !packet.isDestroyed,
+    ).length;
+
     this.packetsNotInWarehouse = this.packets.filter(
-      (packet) => packet.location === null,
+      (packet) => !packet.isDestroyed && packet.location === null,
     ).length;
   }
 }

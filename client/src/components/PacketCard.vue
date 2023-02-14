@@ -14,8 +14,8 @@
             <div>Tag: {{ packet.company.day }}</div>
           </v-col>
           <v-spacer></v-spacer>
-          <v-col cols="2">Lagerplatz:</v-col>
-          <v-col cols="2">
+          <v-col v-if="!packet.isDestroyed" cols="2">Lagerplatz:</v-col>
+          <v-col v-if="!packet.isDestroyed" cols="2">
             <v-sheet
               color="grey-lighten-3"
               elevation="12"
@@ -27,10 +27,13 @@
               {{ packet.location || "n/a" }}
             </v-sheet>
           </v-col>
+          <v-col v-if="packet.isDestroyed" cols="4" class="text-h4 text-red">
+            ZERSTÖRT!
+          </v-col>
         </v-row>
       </v-container>
       <v-divider class="mt-4 mb-4"></v-divider>
-      <v-btn-toggle v-model="selectedAction" divided>
+      <v-btn-toggle v-if="!packet.isDestroyed" v-model="selectedAction" divided>
         <v-btn
           value="moveIn"
           :disabled="packet.location !== null && packet.location.length > 0"
@@ -59,7 +62,7 @@
           <v-icon end icon="mdi-sync"></v-icon>
         </v-btn>
       </v-btn-toggle>
-      <v-container>
+      <v-container v-if="!packet.isDestroyed">
         <v-row v-if="selectedAction === 'moveIn'">
           <v-col>
             <v-form ref="form" lazy-validation>
@@ -113,47 +116,68 @@
         </v-expansion-panel>
         <v-expansion-panel title="Paketbewegungen">
           <v-expansion-panel-text>
-            <v-timeline side="end" truncate-line="start">
-              <v-timeline-item
-                v-for="item in packet.movements"
-                :key="item.id"
-                :dot-color="getMovementColor(item)"
-                size="small"
-              >
-                <template #opposite>
-                  <div>{{ item.time }}</div>
-                </template>
+            <v-container>
+              <v-row class="justify-center">
+                <v-timeline side="end" truncate-line="start">
+                  <v-timeline-item
+                    v-for="item in packet.movements"
+                    :key="item.id"
+                    :dot-color="getMovementColor(item)"
+                    size="small"
+                  >
+                    <template #opposite>
+                      <div>{{ item.time }}</div>
+                    </template>
 
-                <div>
-                  <div
-                    v-if="item.type === PacketMovementType.IN"
-                    class="text-h6"
-                  >
-                    Einlagerung
-                  </div>
-                  <div
-                    v-if="item.type === PacketMovementType.OUT"
-                    class="text-h6"
-                  >
-                    Auslagerung
-                  </div>
-                  <div
-                    v-if="item.type === PacketMovementType.LOCATION_CHANGE"
-                    class="text-h6"
-                  >
-                    Umlagerung
-                  </div>
-                  <p>Pate: {{ item.actor }}</p>
-                  <p v-if="item.type === PacketMovementType.IN">
-                    Lagerplatz: {{ item.newLocation }}
-                  </p>
-                  <p v-if="item.type === PacketMovementType.LOCATION_CHANGE">
-                    Lagerplatz: {{ item.oldLocation }} nach
-                    {{ item.newLocation }}
-                  </p>
-                </div>
-              </v-timeline-item>
-            </v-timeline>
+                    <div>
+                      <div
+                        v-if="item.type === PacketMovementType.IN"
+                        class="text-h6"
+                      >
+                        Einlagerung
+                      </div>
+                      <div
+                        v-if="item.type === PacketMovementType.OUT"
+                        class="text-h6"
+                      >
+                        Auslagerung
+                      </div>
+                      <div
+                        v-if="item.type === PacketMovementType.LOCATION_CHANGE"
+                        class="text-h6"
+                      >
+                        Umlagerung
+                      </div>
+                      <div
+                        v-if="item.type === PacketMovementType.DESTROY"
+                        class="text-h6"
+                      >
+                        Zerstört
+                      </div>
+                      <p>Pate: {{ item.actor }}</p>
+                      <p v-if="item.type === PacketMovementType.IN">
+                        Lagerplatz: {{ item.newLocation }}
+                      </p>
+                      <p
+                        v-if="item.type === PacketMovementType.LOCATION_CHANGE"
+                      >
+                        Lagerplatz: {{ item.oldLocation }} nach
+                        {{ item.newLocation }}
+                      </p>
+                    </div>
+                  </v-timeline-item>
+                </v-timeline>
+              </v-row>
+              <v-row v-if="packet.isDestroyed" class="justify-center">
+                <v-col cols="2">
+                  <v-img
+                    class="align-self-center"
+                    width="100px"
+                    src="/explosion.gif"
+                  ></v-img>
+                </v-col>
+              </v-row>
+            </v-container>
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
@@ -167,6 +191,15 @@
         >Abbrechen</v-btn
       >
       <v-spacer></v-spacer>
+      <v-btn
+        v-if="!packet.isDestroyed"
+        id="packetDestroyButton"
+        color="error"
+        variant="outlined"
+        :disabled="loading"
+      >
+        Paket zerstören
+      </v-btn>
       <v-btn
         color="Secondary"
         variant="outlined"
@@ -183,6 +216,25 @@
       >
     </v-card-actions>
   </v-card>
+
+  <v-dialog v-model="confirmDestroyDialog" activator="#packetDestroyButton">
+    <v-card width="300px" class="align-self-center">
+      <v-card-text> Paket wirklich als "zerstört" markieren? </v-card-text>
+      <v-card-actions>
+        <v-btn
+          color="error"
+          variant="outlined"
+          @click="confirmDestroyDialog = false"
+        >
+          Abbrechen
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="success" variant="outlined" @click="destroyPacket()">
+          Ja
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -220,7 +272,9 @@ const packet: PacketDetailed = reactive({
   },
   location: "",
   movements: [],
+  isDestroyed: false,
 });
+const confirmDestroyDialog = ref<boolean>(false);
 
 const saveButtonText = computed(() => {
   if (!selectedAction.value) {
@@ -244,10 +298,31 @@ const getMovementColor = (movement: PacketMovement) => {
     case PacketMovementType.IN:
       return "success";
     case PacketMovementType.OUT:
+    case PacketMovementType.DESTROY:
       return "error";
     case PacketMovementType.LOCATION_CHANGE:
       return "info";
   }
+};
+
+const destroyPacket = async () => {
+  const data: CreatePacketMovementParams = {
+    time: new Date(),
+    type: PacketMovementType.DESTROY,
+    packetId: props.packetID,
+    oldLocation: packet.location,
+    newLocation: undefined,
+    actor: undefined,
+  };
+
+  try {
+    await axios.post("/api/packetMovement", data);
+  } catch (e) {
+    alert(e);
+  }
+
+  confirmDestroyDialog.value = false;
+  await loadPacketData();
 };
 
 const printLabelWrapped = async () => {
@@ -313,7 +388,7 @@ const save = async () => {
   emit("packetSaved");
 };
 
-onMounted(async () => {
+const loadPacketData = async () => {
   loading.value = true;
 
   try {
@@ -339,7 +414,9 @@ onMounted(async () => {
   }
 
   loading.value = false;
-});
+};
+
+onMounted(loadPacketData);
 </script>
 
 <style></style>

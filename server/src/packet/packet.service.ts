@@ -46,4 +46,8 @@ export class PacketService {
 
     return this.packetRepository.findOneOrFail({ where: { id: newPacket.id } });
   }
+
+  public async updatePacket(id: number, data: Partial<Packet>): Promise<void> {
+    await this.packetRepository.update(id, data);
+  }
 }

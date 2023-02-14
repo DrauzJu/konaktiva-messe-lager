@@ -6,6 +6,7 @@ export type Packet = {
   id: number;
   company: Company;
   location: string;
+  isDestroyed: boolean;
 }
 
 export type PacketDetailed = Packet & {
@@ -18,4 +19,7 @@ export class CreatePacketParams {
 
   @IsOptional()
   public location: string | undefined;
+}
+
+export class UpdatePacketParams {
 }

@@ -44,6 +44,7 @@ export class CompanyService {
     company.id = data.id;
     company.day = data.day;
     company.name = data.name;
+    company.booth = data.booth;
 
     return this.companyRepository.save(company);
   }

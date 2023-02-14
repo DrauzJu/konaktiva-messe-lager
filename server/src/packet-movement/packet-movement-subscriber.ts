@@ -1,3 +1,4 @@
+import { PacketMovementType } from 'messe-lager-dto';
 import { Packet } from 'src/packet/packet.model';
 import {
   EntitySubscriberInterface,
@@ -19,6 +20,10 @@ export class PacketMovementSubscriber
 
     const packet = event.entity.packet;
     packet.location = event.entity.newLocation;
+
+    if (event.entity.type === PacketMovementType.DESTROY) {
+      packet.isDestroyed = true;
+    }
 
     await packetRepository.save(packet);
   }

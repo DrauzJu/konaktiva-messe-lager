@@ -24,4 +24,7 @@ export class Packet {
 
   @OneToMany(() => PacketMovement, (movement) => movement.packet)
   movements: PacketMovement[];
+
+  @Column({ nullable: false, default: false })
+  isDestroyed: boolean;
 }

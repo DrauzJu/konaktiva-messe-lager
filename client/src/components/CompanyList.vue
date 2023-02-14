@@ -42,6 +42,7 @@
 import { onMounted, reactive, ref } from "vue";
 import axios from "axios";
 import { Header, Item } from "vue3-easy-data-table";
+import { CreateCompanyParams } from "messe-lager-dto";
 
 const rowsPerPage = 10000; // "disable" pagination
 const headers: Header[] = [
@@ -72,12 +73,15 @@ const generateTest = async () => {
   loading.value = true;
 
   for (let i = 0; i < 10; i++) {
+    const data: CreateCompanyParams = {
+      id: i,
+      name: `Unternehmen ${i + 1}`,
+      day: "Di",
+      booth: `${i + 1}`,
+    };
+
     try {
-      await axios.post("/api/company", {
-        id: i,
-        name: `Unternehmen ${i + 1}`,
-        day: "Di",
-      });
+      await axios.post("/api/company", data);
     } catch (e) {
       alert(e);
     }

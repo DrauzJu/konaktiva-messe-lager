@@ -1,5 +1,5 @@
 import 'reflect-metadata';
 
-export { Packet, PacketDetailed, CreatePacketParams } from './Packet';
+export { Packet, PacketDetailed, CreatePacketParams, UpdatePacketParams } from './Packet';
 export { PacketMovement, PacketMovementType, CreatePacketMovementParams } from './PacketMovement';
 export { Company, CreateCompanyParams } from './Company';

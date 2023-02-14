@@ -4,7 +4,8 @@ import { Packet } from "./Packet";
 export enum PacketMovementType {
   IN,
   OUT,
-  LOCATION_CHANGE
+  LOCATION_CHANGE,
+  DESTROY,
 };
 
 export type PacketMovement = {

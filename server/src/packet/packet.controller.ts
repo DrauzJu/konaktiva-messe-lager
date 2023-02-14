@@ -5,11 +5,17 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
-import { CreatePacketParams, Packet, PacketDetailed } from 'messe-lager-dto';
+import {
+  CreatePacketParams,
+  Packet,
+  PacketDetailed,
+  UpdatePacketParams,
+} from 'messe-lager-dto';
 import { PacketService } from './packet.service';
 
 @Controller('packet')
@@ -46,5 +52,27 @@ export class PacketController {
     }
 
     return this.packetService.createPacket(data);
+  }
+
+  @Patch(':id')
+  public async updatePacket(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Param('id') id: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Body() dataPlain: UpdatePacketParams,
+  ): Promise<void> {
+    throw new HttpException('Not supported yet', HttpStatus.BAD_REQUEST);
+
+    /* const data = plainToClass(UpdatePacketParams, dataPlain);
+
+    const validationErrors = await validate(data);
+    if (validationErrors.length > 0) {
+      throw new HttpException(
+        validationErrors[0].toString(),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.packetService.updatePacket(id, data); */
   }
 }

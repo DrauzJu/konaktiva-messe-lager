@@ -5,6 +5,14 @@
         <v-btn id="btn-new-packet" color="primary" size="large"> Neu </v-btn>
       </v-col>
       <v-spacer></v-spacer>
+      <v-col id="showDestroyedPacketSwitch" class="self-align-center" cols="3">
+        <v-switch
+          v-model="showDestroyedPackets"
+          hide-details
+          label="Zerstörte Pakete anzeigen"
+          color="primary"
+        ></v-switch>
+      </v-col>
       <v-col>
         <v-text-field
           v-model="searchValue"
@@ -66,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { ClickRowArgument, Header, Item } from "vue3-easy-data-table";
 import NewPacketCard from "@/components/NewPacketCard.vue";
 import PacketCard from "@/components/PacketCard.vue";
@@ -80,6 +88,7 @@ const searchValue = ref("");
 const newPacketDialogVisible = ref(false);
 const packetDialogVisible = ref(false);
 const selectedPacket = ref(0);
+const showDestroyedPackets = ref(false);
 const items = reactive<Item[]>([]);
 
 const headers: Header[] = [
@@ -102,6 +111,10 @@ const loadPackets = async () => {
     const response = await axios.get("/api/packet");
 
     (response.data as Packet[]).map((packet: Packet) => {
+      if (!showDestroyedPackets.value && packet.isDestroyed) {
+        return;
+      }
+
       items.push({
         id: packet.id,
         location: packet.location,
@@ -115,6 +128,7 @@ const loadPackets = async () => {
 };
 
 onMounted(loadPackets);
+watch(showDestroyedPackets, loadPackets);
 
 let scannerInput = "";
 window.onkeypress = (event: KeyboardEvent) => {
@@ -141,4 +155,10 @@ window.onkeypress = (event: KeyboardEvent) => {
 
 <style>
 @import "../assets/tableStyle.css";
+
+@media screen and (max-width: 700px) {
+  #showDestroyedPacketSwitch {
+    display: none;
+  }
+}
 </style>
