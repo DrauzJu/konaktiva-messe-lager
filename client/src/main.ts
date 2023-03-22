@@ -1,6 +1,7 @@
 import App from "@/App.vue";
 import PacketList from "@/components/PacketList.vue";
 import CompanyList from "@/components/CompanyList.vue";
+import ActorList from "@/components/ActorList.vue";
 import { createApp } from "vue";
 import { registerPlugins } from "@/plugins";
 import { createRouter, createWebHashHistory } from "vue-router";
@@ -15,6 +16,7 @@ const router = createRouter({
   routes: [
     { path: "/packetList", component: PacketList },
     { path: "/companyList", component: CompanyList },
+    { path: "/actorList", component: ActorList },
   ],
 });
 

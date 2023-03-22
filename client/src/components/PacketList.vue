@@ -92,7 +92,7 @@ const showDestroyedPackets = ref(false);
 const items = reactive<Item[]>([]);
 
 const headers: Header[] = [
-  { text: "Number", value: "id", sortable: true },
+  { text: "Nummer", value: "id", sortable: true },
   { text: "Tag", value: "day", sortable: false },
   { text: "Unternehmen", value: "company", sortable: true },
   { text: "Position", value: "location", sortable: true },

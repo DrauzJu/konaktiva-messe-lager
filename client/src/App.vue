@@ -10,6 +10,8 @@
         <v-tab key="packets" to="/packetList">Pakete</v-tab>
         <v-divider vertical></v-divider>
         <v-tab key="companies" to="/companyList">Unternehmen</v-tab>
+        <v-divider vertical></v-divider>
+        <v-tab key="actors" to="/actorList">Helfer</v-tab>
       </v-tabs>
     </v-app-bar>
 

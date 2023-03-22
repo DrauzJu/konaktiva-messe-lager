@@ -73,26 +73,28 @@
                 persistent-hint
                 clearable
               ></v-text-field>
-              <v-text-field
+              <v-combobox
                 v-model="actionMoveInActor"
-                label="Pate"
+                label="Helfer"
+                :items="actorSuggestions"
                 :disabled="loading"
                 persistent-hint
                 clearable
-              ></v-text-field>
+              ></v-combobox>
             </v-form>
           </v-col>
         </v-row>
         <v-row v-if="selectedAction === 'moveOut'">
           <v-col>
             <v-form ref="form" lazy-validation>
-              <v-text-field
+              <v-combobox
                 v-model="actionMoveOutActor"
-                label="Pate"
+                label="Helfer"
+                :items="actorSuggestions"
                 :disabled="loading"
                 persistent-hint
                 clearable
-              ></v-text-field>
+              ></v-combobox>
             </v-form>
           </v-col>
         </v-row>
@@ -154,7 +156,7 @@
                       >
                         Zerstört
                       </div>
-                      <p>Pate: {{ item.actor }}</p>
+                      <p>Helfer: {{ item.actor }}</p>
                       <p v-if="item.type === PacketMovementType.IN">
                         Lagerplatz: {{ item.newLocation }}
                       </p>
@@ -211,7 +213,7 @@
         color="success"
         variant="outlined"
         :disabled="loading || !selectedAction || selectedAction.length === 0"
-        @click="save"
+        @click="save()"
         >{{ saveButtonText }}</v-btn
       >
     </v-card-actions>
@@ -240,6 +242,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, computed } from "vue";
 import {
+  Actor,
   CreatePacketMovementParams,
   PacketDetailed,
   PacketMovement,
@@ -275,6 +278,7 @@ const packet: PacketDetailed = reactive({
   isDestroyed: false,
 });
 const confirmDestroyDialog = ref<boolean>(false);
+const actorSuggestions = reactive<Actor[]>([]);
 
 const saveButtonText = computed(() => {
   if (!selectedAction.value) {
@@ -392,8 +396,14 @@ const loadPacketData = async () => {
   loading.value = true;
 
   try {
-    const response = await axios.get(`/api/packet/${props.packetID}`);
-    Object.assign(packet, response.data as PacketDetailed);
+    const [packetResponse, actorResponse] = await Promise.all([
+      axios.get(`/api/packet/${props.packetID}`),
+      axios.get("/api/actor"),
+    ]);
+
+    Object.assign(packet, packetResponse.data as PacketDetailed);
+    actorSuggestions.length = 0;
+    actorSuggestions.push(...actorResponse.data.map((x: Actor) => x.name));
   } catch (e) {
     alert(e);
   }

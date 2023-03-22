@@ -9,6 +9,7 @@ import { PacketMovementModule } from './packet-movement/packet-movement.module';
 import { CompanyModule } from './company/company.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ReadOnlyGuard } from './read-only-guard';
+import { ActorModule } from './actor/actor.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ReadOnlyGuard } from './read-only-guard';
     CompanyModule,
     PacketModule,
     PacketMovementModule,
+    ActorModule,
   ],
   controllers: [],
   providers: [
