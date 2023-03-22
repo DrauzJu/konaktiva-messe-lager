@@ -33,6 +33,7 @@ export class PacketService {
   public async createPacket(data: CreatePacketParams): Promise<Packet> {
     const packet = new Packet();
     packet.company = <any>data.companyId;
+    packet.comment = <any>data.comment;
     const newPacket = await this.packetRepository.save(packet);
 
     await this.packetMovementService.createPacketMovement({

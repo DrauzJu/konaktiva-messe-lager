@@ -27,4 +27,7 @@ export class Packet {
 
   @Column({ nullable: false, default: false })
   isDestroyed: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  comment: string;
 }

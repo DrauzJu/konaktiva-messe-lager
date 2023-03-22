@@ -3,7 +3,10 @@
     :model-value="loading"
     class="align-center justify-center"
   ></v-overlay>
-  <v-card :loading="loading">
+  <v-card
+    :loading="loading"
+    @click:outside="emit('update:parentDialogActive', false)"
+  >
     <v-toolbar color="primary" :title="'Paket #' + packetID"></v-toolbar>
     <v-card-text>
       <v-container class="pt-0 pb-0">
@@ -113,8 +116,23 @@
         </v-row>
       </v-container>
       <v-expansion-panels class="mt-8" multiple>
-        <v-expansion-panel title="Details">
-          <v-expansion-panel-text>Spediteur, ...</v-expansion-panel-text>
+        <v-expansion-panel title="Kommentare / Details">
+          <v-expansion-panel-text>
+            <v-textarea
+              v-model="packet.comment"
+              placeholder="Kommentare hier eingeben..."
+              auto-grow
+              prepend-inner-icon="mdi-comment"
+            ></v-textarea>
+            <v-btn
+              color="primary"
+              prepend-icon="mdi-content-save"
+              class="mt-3"
+              @click="saveComment"
+            >
+              Speichern
+            </v-btn>
+          </v-expansion-panel-text>
         </v-expansion-panel>
         <v-expansion-panel title="Paketbewegungen">
           <v-expansion-panel-text>
@@ -237,6 +255,15 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <v-snackbar
+    v-model="packetCommentSavedSnackbar"
+    timeout="4000"
+    color="primary"
+    elevation="24"
+  >
+    <div class="text-center">Kommentar gespeichert!</div>
+  </v-snackbar>
 </template>
 
 <script setup lang="ts">
@@ -247,6 +274,7 @@ import {
   PacketDetailed,
   PacketMovement,
   PacketMovementType,
+  UpdatePacketParams,
 } from "messe-lager-dto";
 import axios from "axios";
 import printLabel from "../dymo/print";
@@ -264,6 +292,7 @@ const actionMoveInActor = ref<string>();
 const actionMoveInLocation = ref<string>();
 const actionMoveOutActor = ref<string>();
 const actionChangeLocationLocation = ref<string>();
+
 const packet: PacketDetailed = reactive({
   id: 0,
   company: {
@@ -276,9 +305,12 @@ const packet: PacketDetailed = reactive({
   location: "",
   movements: [],
   isDestroyed: false,
+  comment: "",
 });
+
 const confirmDestroyDialog = ref<boolean>(false);
 const actorSuggestions = reactive<Actor[]>([]);
+const packetCommentSavedSnackbar = ref<boolean>(false);
 
 const saveButtonText = computed(() => {
   if (!selectedAction.value) {
@@ -390,6 +422,22 @@ const save = async () => {
 
   emit("update:parentDialogActive", false);
   emit("packetSaved");
+};
+
+const saveComment = async () => {
+  loading.value = true;
+
+  try {
+    await axios.patch(`/api/packet/${props.packetID}`, {
+      comment: packet.comment,
+    } as UpdatePacketParams);
+
+    packetCommentSavedSnackbar.value = true;
+  } catch (e) {
+    alert(e);
+  }
+
+  loading.value = false;
 };
 
 const loadPacketData = async () => {

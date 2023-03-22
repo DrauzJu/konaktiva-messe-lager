@@ -18,7 +18,6 @@
           persistent-hint
           clearable
         ></v-autocomplete>
-        <v-divider></v-divider>
         <v-text-field
           v-model="selectedLocation"
           label="Lagerplatz"
@@ -27,6 +26,12 @@
           persistent-hint
           clearable
         ></v-text-field>
+        <v-textarea
+          v-model="comment"
+          placeholder="Kommentare hier eingeben..."
+          auto-grow
+          prepend-inner-icon="mdi-comment"
+        ></v-textarea>
       </v-form>
     </v-card-text>
     <v-card-actions>
@@ -57,6 +62,7 @@ const loading = ref(false);
 const validForm = ref(false);
 const selectedCompany = ref<number>();
 const selectedLocation = ref<string>("");
+const comment = ref<string>("");
 const companies = reactive<Company[]>([]);
 
 watch(selectedCompany, async (newValue) => {
@@ -81,6 +87,7 @@ const save = async () => {
   const data: CreatePacketParams = {
     companyId: selectedCompany.value!,
     location: selectedLocation.value,
+    comment: comment.value,
   };
 
   try {

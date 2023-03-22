@@ -56,14 +56,10 @@ export class PacketController {
 
   @Patch(':id')
   public async updatePacket(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Param('id') id: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Body() dataPlain: UpdatePacketParams,
   ): Promise<void> {
-    throw new HttpException('Not supported yet', HttpStatus.BAD_REQUEST);
-
-    /* const data = plainToClass(UpdatePacketParams, dataPlain);
+    const data = plainToClass(UpdatePacketParams, dataPlain);
 
     const validationErrors = await validate(data);
     if (validationErrors.length > 0) {
@@ -73,6 +69,6 @@ export class PacketController {
       );
     }
 
-    await this.packetService.updatePacket(id, data); */
+    await this.packetService.updatePacket(id, data);
   }
 }
