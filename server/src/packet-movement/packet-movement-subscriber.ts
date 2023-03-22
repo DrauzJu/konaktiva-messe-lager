@@ -23,6 +23,7 @@ export class PacketMovementSubscriber
 
     if (event.entity.type === PacketMovementType.DESTROY) {
       packet.isDestroyed = true;
+      packet.location = '';
     }
 
     await packetRepository.save(packet);
