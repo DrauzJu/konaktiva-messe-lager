@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { Packet } from "./Packet";
 
@@ -13,6 +14,7 @@ export type Company = {
 
 export class CreateCompanyParams {
   @IsNumber()
+  @Type(() => Number)
   public id!: number;
 
   @IsString()
@@ -27,3 +29,7 @@ export class CreateCompanyParams {
   @IsNotEmpty()
   public booth!: string;
 };
+
+export class BatchCreateFromCSVParams {
+  public data!: string;
+}

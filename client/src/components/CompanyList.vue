@@ -6,8 +6,17 @@
   <v-container class="fill-height">
     <v-row no-gutters class="align-center">
       <v-col class="mr-2">
-        <v-btn id="btn-new-packet" color="secondary" @click="generateTest()">
-          Generate test companies
+        <v-textarea
+          v-model="csvImportData"
+          label="CSV Daten (Format: id;name;day;booth) - mit Header!"
+        ></v-textarea>
+        <v-btn
+          color="primary"
+          prepend-icon="mdi-content-save"
+          class="mt-2"
+          @click="uploadCSVData"
+        >
+          Upload
         </v-btn>
       </v-col>
     </v-row>
@@ -42,7 +51,7 @@
 import { onMounted, reactive, ref } from "vue";
 import axios from "axios";
 import { Header, Item } from "vue3-easy-data-table";
-import { CreateCompanyParams } from "messe-lager-dto";
+import { BatchCreateFromCSVParams } from "messe-lager-dto";
 
 const rowsPerPage = 10000; // "disable" pagination
 const headers: Header[] = [
@@ -56,6 +65,7 @@ const headers: Header[] = [
 
 const loading = ref(false);
 const items = reactive<Item[]>([]);
+const csvImportData = ref("id;name;day;booth\n");
 
 const loadCompanies = async () => {
   items.length = 0;
@@ -69,22 +79,15 @@ const loadCompanies = async () => {
   }
 };
 
-const generateTest = async () => {
+const uploadCSVData = async () => {
   loading.value = true;
 
-  for (let i = 0; i < 10; i++) {
-    const data: CreateCompanyParams = {
-      id: i,
-      name: `Unternehmen ${i + 1}`,
-      day: "Di",
-      booth: `${i + 1}`,
-    };
-
-    try {
-      await axios.post("/api/company", data);
-    } catch (e) {
-      alert(e);
-    }
+  try {
+    await axios.post("/api/company/batchCreateFromCSV", {
+      data: csvImportData.value,
+    } as BatchCreateFromCSVParams);
+  } catch (e) {
+    alert(e);
   }
 
   await loadCompanies();

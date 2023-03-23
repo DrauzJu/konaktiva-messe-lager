@@ -48,4 +48,20 @@ export class CompanyService {
 
     return this.companyRepository.save(company);
   }
+
+  public async upsertCompany(data: CreateCompanyParams): Promise<Company> {
+    const existingEntity = await this.companyRepository.findOneBy({
+      id: data.id,
+    });
+
+    if (existingEntity) {
+      existingEntity.day = data.day;
+      existingEntity.name = data.name;
+      existingEntity.booth = data.booth;
+
+      return this.companyRepository.save(existingEntity);
+    }
+
+    return this.createCompany(data);
+  }
 }

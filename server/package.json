@@ -28,6 +28,7 @@
     "class-validator": "^0.14.0",
     "messe-lager-dto": "1.0.0",
     "mysql2": "^2.3.3",
+    "nest-csv-parser": "^2.0.4",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",

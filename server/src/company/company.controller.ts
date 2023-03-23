@@ -9,12 +9,21 @@ import {
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
-import { Company, CreateCompanyParams } from 'messe-lager-dto';
+import {
+  BatchCreateFromCSVParams,
+  Company,
+  CreateCompanyParams,
+} from 'messe-lager-dto';
+import { CsvParser, ParsedData } from 'nest-csv-parser';
+import { Readable } from 'stream';
 import { CompanyService } from './company.service';
 
 @Controller('company')
 export class CompanyController {
-  public constructor(private readonly companyService: CompanyService) {}
+  public constructor(
+    private readonly companyService: CompanyService,
+    private readonly csvParser: CsvParser,
+  ) {}
 
   @Get()
   public async getCompanys(): Promise<Company[]> {
@@ -43,5 +52,41 @@ export class CompanyController {
     }
 
     return this.companyService.createCompany(data);
+  }
+
+  @Post('batchCreateFromCSV')
+  public async batchCreateFromCSV(
+    @Body() input: BatchCreateFromCSVParams,
+  ): Promise<void> {
+    const inputStream = Readable.from(input.data);
+    let parsedInputData: ParsedData<CreateCompanyParams>;
+
+    try {
+      parsedInputData = await this.csvParser.parse(
+        inputStream,
+        CreateCompanyParams,
+      );
+    } catch (e) {
+      throw new HttpException('Invalid CSV', HttpStatus.BAD_REQUEST);
+    }
+
+    const validatedData = await Promise.all(
+      parsedInputData.list.map(async (rawObj) => {
+        const newCompany = plainToClass(CreateCompanyParams, rawObj);
+        const validationErrors = await validate(newCompany);
+        if (validationErrors.length > 0) {
+          throw new HttpException(
+            validationErrors[0].toString(),
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        return newCompany;
+      }),
+    );
+
+    await Promise.all(
+      validatedData.map((data) => this.companyService.upsertCompany(data)),
+    );
   }
 }
