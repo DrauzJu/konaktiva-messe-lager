@@ -39,7 +39,7 @@
       <v-btn-toggle v-if="!packet.isDestroyed" v-model="selectedAction" divided>
         <v-btn
           value="moveIn"
-          :disabled="packet.location !== null && packet.location.length > 0"
+          :disabled="!!packet.location"
           variant="outlined"
           color="primary"
         >
@@ -48,7 +48,7 @@
         </v-btn>
         <v-btn
           value="moveOut"
-          :disabled="packet.location === null || packet.location.length === 0"
+          :disabled="!packet.location"
           variant="outlined"
           color="primary"
         >
@@ -57,7 +57,7 @@
         </v-btn>
         <v-btn
           value="moveLocation"
-          :disabled="packet.location === null || packet.location.length === 0"
+          :disabled="!packet.location"
           variant="outlined"
           color="primary"
         >
@@ -146,7 +146,9 @@
                     size="small"
                   >
                     <template #opposite>
-                      <div>{{ item.time }}</div>
+                      <div>
+                        {{ dateTimeFormat.format(new Date(item.time)) }}
+                      </div>
                     </template>
 
                     <div>
@@ -228,6 +230,7 @@
         >Etikett drucken</v-btn
       >
       <v-btn
+        v-if="!packet.isDestroyed"
         color="success"
         variant="outlined"
         :disabled="loading || !selectedAction || selectedAction.length === 0"
@@ -293,6 +296,14 @@ const actionMoveInLocation = ref<string>();
 const actionMoveOutActor = ref<string>();
 const actionChangeLocationLocation = ref<string>();
 
+const dateTimeFormat = new Intl.DateTimeFormat("default", {
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+  hour: "numeric",
+  minute: "numeric",
+});
+
 const packet: PacketDetailed = reactive({
   id: 0,
   company: {
@@ -334,6 +345,7 @@ const getMovementColor = (movement: PacketMovement) => {
     case PacketMovementType.IN:
       return "success";
     case PacketMovementType.OUT:
+    // fallthrough
     case PacketMovementType.DESTROY:
       return "error";
     case PacketMovementType.LOCATION_CHANGE:
@@ -457,7 +469,7 @@ const loadPacketData = async () => {
   }
 
   // Default actions
-  if (packet.location === null || packet.location.length === 0) {
+  if (!packet.location) {
     selectedAction.value = "moveIn";
 
     const lastMovementWithLocation = packet.movements.findLast(

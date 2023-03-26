@@ -71,6 +71,28 @@
       @packet-saved="loadPackets"
     />
   </v-dialog>
+
+  <v-dialog
+    v-model="batchMovementDialogVisible"
+    max-width="600px"
+    min-width="450px"
+    scrollable
+  >
+    <BatchMovementCard
+      v-model:parent-dialog-active="batchMovementDialogVisible"
+      v-model:firstPacketID="batchMovementStartPacket"
+      @batch-movements-saved="loadPackets"
+    />
+  </v-dialog>
+
+  <v-snackbar
+    v-model="scannedPacketFailureSnackbar"
+    timeout="4000"
+    color="error"
+    elevation="24"
+  >
+    <div class="text-center">Paket nicht gefunden!</div>
+  </v-snackbar>
 </template>
 
 <script setup lang="ts">
@@ -78,18 +100,24 @@ import { onMounted, reactive, ref, watch } from "vue";
 import { ClickRowArgument, Header, Item } from "vue3-easy-data-table";
 import NewPacketCard from "@/components/NewPacketCard.vue";
 import PacketCard from "@/components/PacketCard.vue";
+import BatchMovementCard from "@/components/BatchMovementCard.vue";
 import axios from "axios";
 import { Packet } from "messe-lager-dto";
 
 const rowsPerPage = 10000; // "disable" pagination
-const searchField = ["number", "company", "location"];
+const searchField = ["id", "company", "location"];
 const searchValue = ref("");
 
 const newPacketDialogVisible = ref(false);
 const packetDialogVisible = ref(false);
+const batchMovementDialogVisible = ref(false);
 const selectedPacket = ref(0);
 const showDestroyedPackets = ref(false);
 const items = reactive<Item[]>([]);
+const batchMovementStartPacket = ref(0);
+const scannedPacketFailureSnackbar = ref(false);
+
+let scannerInput = "";
 
 const headers: Header[] = [
   { text: "Nummer", value: "id", sortable: true },
@@ -120,6 +148,7 @@ const loadPackets = async () => {
         location: packet.location,
         company: `${packet.company.name} (Stand ${packet.company.booth})`,
         day: packet.company.day,
+        isDestroyed: packet.isDestroyed,
       });
     });
   } catch (e) {
@@ -127,30 +156,40 @@ const loadPackets = async () => {
   }
 };
 
-onMounted(loadPackets);
-watch(showDestroyedPackets, loadPackets);
+const setKeypressListener = () => {
+  scannerInput = "";
 
-let scannerInput = "";
-window.onkeypress = (event: KeyboardEvent) => {
-  if (event.key == "Enter") {
-    const matchedItems = items.filter((i) => i.id === parseInt(scannerInput));
+  window.onkeypress = (event: KeyboardEvent) => {
+    if (event.key == "Enter") {
+      const matchedItems = items.filter(
+        (i) => i.id === parseInt(scannerInput) && !i.isDestroyed
+      );
 
-    if (matchedItems.length == 0) {
-      console.log("Packet not found: " + scannerInput);
+      if (matchedItems.length == 0) {
+        scannedPacketFailureSnackbar.value = true;
+        scannerInput = "";
+        return;
+      }
+
+      const item = matchedItems[0];
+      batchMovementStartPacket.value = item.id;
+      batchMovementDialogVisible.value = true;
       scannerInput = "";
-      return;
+
+      event.preventDefault();
+    } else if (!isNaN(parseInt(event.key))) {
+      scannerInput = scannerInput + event.key;
     }
-
-    const item = matchedItems[0];
-    selectedPacket.value = item.id;
-    packetDialogVisible.value = true;
-    scannerInput = "";
-
-    event.preventDefault();
-  } else if (!isNaN(parseInt(event.key))) {
-    scannerInput = scannerInput + event.key;
-  }
+  };
 };
+
+onMounted(() => {
+  loadPackets();
+  setKeypressListener();
+});
+
+watch(showDestroyedPackets, loadPackets);
+watch(batchMovementDialogVisible, setKeypressListener);
 </script>
 
 <style>

@@ -28,7 +28,7 @@ export class PacketMovementService {
       throw new HttpException('Invalid Packet ID!', HttpStatus.BAD_REQUEST);
     }
 
-    if (packet.location !== null) {
+    if (packet.location) {
       if (data.type === PacketMovementType.IN) {
         throw new HttpException(
           'Packet is already in warehouse!',

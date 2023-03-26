@@ -30,6 +30,16 @@ export class CompanyController {
     return this.companyService.getCompanys();
   }
 
+  @Get(':id')
+  public async getCompany(@Param('id') id: number): Promise<Company> {
+    const company = await this.companyService.findCompany(id);
+    if (company === null) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
+
+    return company;
+  }
+
   @Get(':id/mainLocation')
   public async getMainLocation(
     @Param('id') id: number,

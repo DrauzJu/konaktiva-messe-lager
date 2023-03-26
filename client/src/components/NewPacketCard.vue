@@ -4,9 +4,14 @@
     class="align-center justify-center"
   ></v-overlay>
   <v-card :loading="loading">
-    <v-toolbar color="primary" title="Neues Paket"></v-toolbar>
+    <v-toolbar color="primary" title="Neue Pakete"></v-toolbar>
     <v-card-text>
       <v-form ref="form" v-model="validForm" lazy-validation>
+        <v-select
+          v-model="selectedAmount"
+          :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
+          label="Anzahl"
+        ></v-select>
         <v-autocomplete
           v-model="selectedCompany"
           label="Unternehmen"
@@ -60,6 +65,7 @@ const emit = defineEmits(["update:parentDialogActive", "newPacketSaved"]);
 
 const loading = ref(false);
 const validForm = ref(false);
+const selectedAmount = ref<number>(1);
 const selectedCompany = ref<number>();
 const selectedLocation = ref<string>("");
 const comment = ref<string>("");
@@ -91,10 +97,12 @@ const save = async () => {
   };
 
   try {
-    const response = await axios.post("/api/packet", data);
-    const newPacket = response.data as Packet;
+    for (let i = 0; i < selectedAmount.value; i++) {
+      const response = await axios.post("/api/packet", data);
+      const newPacket = response.data as Packet;
 
-    await printLabel(newPacket.id, newPacket.company.name);
+      await printLabel(newPacket.id, newPacket.company.name);
+    }
   } catch (e) {
     alert(e);
   }

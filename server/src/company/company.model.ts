@@ -32,7 +32,7 @@ export class Company {
     ).length;
 
     this.packetsNotInWarehouse = this.packets.filter(
-      (packet) => !packet.isDestroyed && packet.location === null,
+      (packet) => !packet.isDestroyed && !packet.location,
     ).length;
   }
 }
