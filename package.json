@@ -1,4 +1,8 @@
 {
   "private": true,
-  "workspaces": ["dto", "client", "server"]
+  "workspaces": [
+    "dto",
+    "client",
+    "server"
+  ]
 }
