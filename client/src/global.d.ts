@@ -1,13 +1,13 @@
 /// <reference types="vite/client" />
 
-declare module "*.vue" {
+export declare module "*.vue" {
   import type { DefineComponent } from "vue";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const component: DefineComponent<object, object, any>;
   export default component;
 }
 
-declare global {
+export declare global {
   interface Array<T> {
     findLast(
       predicate: (value: T, index: number, obj: T[]) => unknown,
@@ -16,13 +16,13 @@ declare global {
     ): T | undefined;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  type DymoInitCb = (value: any) => void;
+  export declare namespace dymo {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type DymoInitCb = (value: any) => void;
 
-  type DymoPrinter = { name: string };
-  type DymoPrinters = Array<DymoPrinter>;
+    type DymoPrinter = { name: string };
+    type DymoPrinters = Array<DymoPrinter>;
 
-  declare namespace dymo {
     declare namespace label {
       declare namespace framework {
         interface ILabel {

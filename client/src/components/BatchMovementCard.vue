@@ -225,7 +225,7 @@ const addPacket = async (packetID: number) => {
       (movement) => movement.newLocation !== null
     );
 
-    suggestedLocation = lastMovementWithLocation.newLocation ?? "";
+    suggestedLocation = lastMovementWithLocation?.newLocation ?? "";
   }
 
   // Store related company data
