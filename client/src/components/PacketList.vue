@@ -1,5 +1,5 @@
 <template>
-  <v-container class="fill-height">
+  <v-container>
     <v-row no-gutters class="align-center">
       <v-col class="mr-2">
         <v-btn id="btn-new-packet" color="primary" size="large"> Neu </v-btn>
