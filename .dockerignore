@@ -1,5 +1,8 @@
 .vscode/
 node_modules/
 client/node_modules/
+client/dist/
 dto/node_modules/
+dto/dist/
 server/node_modules/
+server/dist/
