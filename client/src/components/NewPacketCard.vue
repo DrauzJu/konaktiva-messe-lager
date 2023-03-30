@@ -24,13 +24,23 @@
           clearable
         ></v-autocomplete>
         <v-text-field
-          v-model="selectedLocation"
+          v-model.trim="selectedLocation"
           label="Lagerplatz"
           :rules="[(v) => !!v || 'Bitte Lagerplatz angeben']"
           :disabled="loading"
           persistent-hint
           clearable
+          @change="onSelectedLocationChange"
         ></v-text-field>
+        <div class="mb-3">
+          <span class="subheading">Andere Pakete auf diesem Lagerplatz: </span>
+          <v-chip-group v-if="packetsOnSameLocation.length > 0" column>
+            <v-chip v-for="packet in packetsOnSameLocation" :key="packet">
+              {{ packet }}
+            </v-chip>
+          </v-chip-group>
+          <span v-else>Keine!</span>
+        </div>
         <v-textarea
           v-model="comment"
           placeholder="Kommentare hier eingeben..."
@@ -70,6 +80,7 @@ const selectedCompany = ref<number>();
 const selectedLocation = ref<string>("");
 const comment = ref<string>("");
 const companies = reactive<Company[]>([]);
+const packetsOnSameLocation = reactive<string[]>([]);
 
 watch(selectedCompany, async (newValue) => {
   if (newValue === null) {
@@ -86,8 +97,39 @@ watch(selectedCompany, async (newValue) => {
     alert(e);
   }
 
+  await onSelectedLocationChange();
+
   loading.value = false;
 });
+
+const onSelectedLocationChange = async () => {
+  if (!selectedLocation.value) {
+    packetsOnSameLocation.length = 0;
+    return;
+  }
+
+  loading.value = true;
+  packetsOnSameLocation.length = 0;
+
+  try {
+    const response = await axios.get(`/api/packet`, {
+      params: {
+        location: selectedLocation.value,
+      },
+    });
+    (response.data as Packet[]).map((packet: Packet) => {
+      if (packet.isDestroyed) {
+        return;
+      }
+
+      packetsOnSameLocation.push(`Paket ${packet.id} (${packet.company.name})`);
+    });
+  } catch (e) {
+    alert(e);
+  }
+
+  loading.value = false;
+};
 
 const save = async () => {
   const data: CreatePacketParams = {

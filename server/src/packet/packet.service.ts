@@ -18,6 +18,14 @@ export class PacketService {
     return this.packetRepository.find();
   }
 
+  public async getPacketsByLocation(location: string): Promise<Packet[]> {
+    return this.packetRepository.find({
+      where: {
+        location,
+      },
+    });
+  }
+
   public async findPacket(id: number): Promise<Packet | null> {
     return this.packetRepository.findOne({
       where: { id },

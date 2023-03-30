@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -23,7 +24,11 @@ export class PacketController {
   public constructor(private readonly packetService: PacketService) {}
 
   @Get()
-  public async getPackets(): Promise<Packet[]> {
+  public async getPackets(@Query('location') location): Promise<Packet[]> {
+    if (location) {
+      return this.packetService.getPacketsByLocation(location);
+    }
+
     return this.packetService.getPackets();
   }
 
