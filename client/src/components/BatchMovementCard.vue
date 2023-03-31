@@ -256,17 +256,19 @@ const addPacket = async (packetID: number) => {
 
 const setKeypressListener = () => {
   window.onkeypress = async (event: KeyboardEvent) => {
-    if (event.key == "Enter") {
-      const enteredPacketID = parseInt(scannerInput, 10);
-      scannerInput = "";
+    if (event.key == "Enter" && scannerInput.length >= 4) {
+      const enteredPacketID = parseInt(scannerInput.slice(-4), 10);
 
       loading.value = true;
       await addPacket(enteredPacketID);
       loading.value = false;
 
+      scannerInput = "";
       event.preventDefault();
     } else if (!isNaN(parseInt(event.key))) {
       scannerInput = scannerInput + event.key;
+    } else {
+      scannerInput = "";
     }
   };
 };

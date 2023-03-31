@@ -160,9 +160,11 @@ const setKeypressListener = () => {
   scannerInput = "";
 
   window.onkeypress = (event: KeyboardEvent) => {
-    if (event.key == "Enter") {
+    if (event.key == "Enter" && scannerInput.length >= 4) {
+      const enteredPacketID = parseInt(scannerInput.slice(-4), 10);
+
       const matchedItems = items.filter(
-        (i) => i.id === parseInt(scannerInput) && !i.isDestroyed
+        (i) => i.id === enteredPacketID && !i.isDestroyed
       );
 
       if (matchedItems.length == 0) {
@@ -174,11 +176,13 @@ const setKeypressListener = () => {
       const item = matchedItems[0];
       batchMovementStartPacket.value = item.id;
       batchMovementDialogVisible.value = true;
-      scannerInput = "";
 
+      scannerInput = "";
       event.preventDefault();
     } else if (!isNaN(parseInt(event.key))) {
       scannerInput = scannerInput + event.key;
+    } else {
+      scannerInput = "";
     }
   };
 };
