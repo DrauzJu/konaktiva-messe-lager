@@ -285,6 +285,7 @@ import {
 } from "messe-lager-dto";
 import axios from "axios";
 import printLabel from "../dymo/print";
+import { VForm } from 'vuetify/components'
 
 const props = defineProps({
   parentDialogActive: { type: Boolean, required: true },
@@ -326,7 +327,7 @@ const packet: PacketDetailed = reactive({
 const confirmDestroyDialog = ref<boolean>(false);
 const actorSuggestions = reactive<Actor[]>([]);
 const packetCommentSavedSnackbar = ref<boolean>(false);
-const form = ref(null);
+const form = ref<VForm | null>(null);
 
 const saveButtonText = computed(() => {
   if (!selectedAction.value) {
@@ -390,6 +391,11 @@ const printLabelWrapped = async () => {
 };
 
 const save = async () => {
+  // Maybe refs need some time?!
+  if (form.value === null) {
+    return;
+  }
+
   let data: CreatePacketMovementParams;
   const validationResult = await form.value.validate();
   

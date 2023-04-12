@@ -112,6 +112,7 @@ import {
   PacketMovementType,
 } from "messe-lager-dto";
 import { computed, onMounted, reactive, ref } from "vue";
+import { VForm } from 'vuetify/components'
 
 const props = defineProps({
   parentDialogActive: { type: Boolean, required: true },
@@ -128,8 +129,8 @@ const actorSuggestions = reactive<Actor[]>([]);
 const packetsPerCompany = reactive<Record<string, Array<PacketDetailed>>>({});
 const scannedPacketFailureSnackbar = ref(false);
 const scannedPacketDuplicateSnackbar = ref(false);
-const actorForm = ref(null);
-const locationForm = ref(null);
+const actorForm = ref<VForm | null>(null);
+const locationForm = ref<VForm | null>(null);
 
 let scannerInput = "";
 let batchMovementType: PacketMovementType;
@@ -163,6 +164,11 @@ const listData = computed(() => {
 });
 
 const save = async () => {
+  // Maybe refs need some time?!
+  if (actorForm.value === null || locationForm.value === null) {
+    return;
+  }
+
   const actorValidationResult = await actorForm.value.validate();
   const locationValidationResult = await locationForm.value.validate();
   
