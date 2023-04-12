@@ -9,48 +9,54 @@
       <v-container style="padding: 0">
         <v-row no-gutters>
           <v-col>
-            <v-combobox
-              v-model="actor"
-              label="Helfer"
-              :items="actorSuggestions"
-              :disabled="loading"
-              persistent-hint
-              clearable
-              hide-details
-            ></v-combobox>
+            <v-form ref="actorForm" lazy-validation>
+              <v-combobox
+                v-model="actor"
+                label="Helfer"
+                :rules="[(v) => !!v || 'Helfer angeben']"
+                :items="actorSuggestions"
+                :disabled="loading"
+                persistent-hint
+                clearable
+                hide-details
+              ></v-combobox>
+            </v-form>
           </v-col>
         </v-row>
         <v-row no-gutters>
           <v-col>
             <v-list>
-              <div v-for="item in listData" :key="item.key">
-                <v-divider v-if="item.type === 'company'"></v-divider>
-                <v-list-subheader v-if="item.type === 'company'">{{
-                  item.name
-                }}</v-list-subheader>
-                <v-list-item v-if="item.type === 'packet'">
-                  <v-container style="padding: 0">
-                    <v-row no-gutters class="align-center">
-                      <v-col>
-                        <v-list-item-title>
-                          Paket {{ item.data!.id }}
-                        </v-list-item-title>
-                      </v-col>
-                      <v-spacer></v-spacer>
-                      <v-col>
-                        <v-text-field
-                          v-model="item.data!.location"
-                          hide-details
-                          label="von/nach Lagerplatz"
-                          :disabled="
-                            batchMovementType === PacketMovementType.OUT
-                          "
-                        ></v-text-field>
-                      </v-col>
-                    </v-row>
-                  </v-container>
-                </v-list-item>
-              </div>
+              <v-form ref="locationForm" lazy-validation>
+                <div v-for="item in listData" :key="item.key">
+                  <v-divider v-if="item.type === 'company'"></v-divider>
+                  <v-list-subheader v-if="item.type === 'company'">{{
+                    item.name
+                  }}</v-list-subheader>
+                  <v-list-item v-if="item.type === 'packet'">
+                    <v-container style="padding: 0">
+                      <v-row no-gutters class="align-center">
+                        <v-col>
+                          <v-list-item-title>
+                            Paket {{ item.data!.id }}
+                          </v-list-item-title>
+                        </v-col>
+                        <v-spacer></v-spacer>
+                        <v-col>
+                          <v-text-field
+                            v-model="item.data!.location"
+                            hide-details
+                            label="von/nach Lagerplatz"
+                            :rules="[(v) => !!v || 'Lagerplatz angeben']"
+                            :disabled="
+                              batchMovementType === PacketMovementType.OUT
+                            "
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-container>
+                  </v-list-item>
+                </div>
+              </v-form>
             </v-list>
           </v-col>
         </v-row>
@@ -122,6 +128,8 @@ const actorSuggestions = reactive<Actor[]>([]);
 const packetsPerCompany = reactive<Record<string, Array<PacketDetailed>>>({});
 const scannedPacketFailureSnackbar = ref(false);
 const scannedPacketDuplicateSnackbar = ref(false);
+const actorForm = ref(null);
+const locationForm = ref(null);
 
 let scannerInput = "";
 let batchMovementType: PacketMovementType;
@@ -155,8 +163,10 @@ const listData = computed(() => {
 });
 
 const save = async () => {
-  if (!actor.value) {
-    alert("Helfer auswählen!");
+  const actorValidationResult = await actorForm.value.validate();
+  const locationValidationResult = await locationForm.value.validate();
+  
+  if (!actorValidationResult.valid || !locationValidationResult.valid) {
     return;
   }
 

@@ -72,6 +72,7 @@
               <v-text-field
                 v-model="actionMoveInLocation"
                 label="Lagerplatz"
+                :rules="[(v) => !!v || 'Lagerplatz angeben']"
                 :disabled="loading"
                 persistent-hint
                 clearable
@@ -79,6 +80,7 @@
               <v-combobox
                 v-model="actionMoveInActor"
                 label="Helfer"
+                :rules="[(v) => !!v || 'Helfer angeben']"
                 :items="actorSuggestions"
                 :disabled="loading"
                 persistent-hint
@@ -93,6 +95,7 @@
               <v-combobox
                 v-model="actionMoveOutActor"
                 label="Helfer"
+                :rules="[(v) => !!v || 'Helfer angeben']"
                 :items="actorSuggestions"
                 :disabled="loading"
                 persistent-hint
@@ -107,6 +110,7 @@
               <v-text-field
                 v-model="actionChangeLocationLocation"
                 label="Neuer Lagerplatz"
+                :rules="[(v) => !!v || 'Lagerplatz angeben']"
                 :disabled="loading"
                 persistent-hint
                 clearable
@@ -322,6 +326,7 @@ const packet: PacketDetailed = reactive({
 const confirmDestroyDialog = ref<boolean>(false);
 const actorSuggestions = reactive<Actor[]>([]);
 const packetCommentSavedSnackbar = ref<boolean>(false);
+const form = ref(null);
 
 const saveButtonText = computed(() => {
   if (!selectedAction.value) {
@@ -386,6 +391,11 @@ const printLabelWrapped = async () => {
 
 const save = async () => {
   let data: CreatePacketMovementParams;
+  const validationResult = await form.value.validate();
+  
+  if (!validationResult.valid) {
+    return;
+  }
 
   switch (selectedAction.value) {
     case "moveIn":
