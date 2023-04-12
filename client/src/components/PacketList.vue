@@ -145,7 +145,7 @@ const loadPackets = async () => {
 
       items.push({
         id: packet.id,
-        location: packet.location,
+        location: packet.isDestroyed ? 'ZERSTÖRT' : packet.location,
         company: `${packet.company.name} (Stand ${packet.company.booth})`,
         day: packet.company.day,
         isDestroyed: packet.isDestroyed,
