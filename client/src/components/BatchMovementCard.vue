@@ -85,6 +85,15 @@
   >
     <div class="text-center">Paket nicht gefunden!</div>
   </v-snackbar>
+
+  <v-snackbar
+    v-model="scannedPacketDuplicateSnackbar"
+    timeout="3000"
+    color="error"
+    elevation="24"
+  >
+    <div class="text-center">Paket bereits gescannt!</div>
+  </v-snackbar>
 </template>
 
 <script setup lang="ts">
@@ -112,6 +121,7 @@ const actor = ref("");
 const actorSuggestions = reactive<Actor[]>([]);
 const packetsPerCompany = reactive<Record<string, Array<PacketDetailed>>>({});
 const scannedPacketFailureSnackbar = ref(false);
+const scannedPacketDuplicateSnackbar = ref(false);
 
 let scannerInput = "";
 let batchMovementType: PacketMovementType;
@@ -198,6 +208,19 @@ const addPacket = async (packetID: number) => {
   }
 
   const packetData = packetResponse.data as PacketDetailed;
+  const companyId = packetData.company.id.toString();
+
+  // Check if already scanned
+  const alreadyScanned = packetsPerCompany[companyId] && packetsPerCompany[companyId].some(
+    (elem) => elem.id === packetID
+  );
+
+  if (alreadyScanned) {
+    console.log(`${packetID} already scanned!`);
+    scannedPacketDuplicateSnackbar.value = true;
+    return;
+  }
+
   let movementType: PacketMovementType | undefined;
 
   // Check packet status
@@ -232,21 +255,20 @@ const addPacket = async (packetID: number) => {
   // Must be fetched again because statistics are not included in packetData (all values are 0)
   try {
     const companyResponse = await axios.get(
-      `/api/company/${packetData.company.id}`
+      `/api/company/${companyId}`
     );
 
-    companyData[packetData.company.id.toString()] =
-      companyResponse.data as Company;
+    companyData[companyId] = companyResponse.data as Company;
   } catch (e) {
     console.log(e); // Silently ignore
   }
 
   // Add to list packetsPerCompany
-  if (!(packetData.company.id.toString() in packetsPerCompany)) {
-    packetsPerCompany[packetData.company.id.toString()] = [];
+  if (!(companyId in packetsPerCompany)) {
+    packetsPerCompany[companyId] = [];
   }
 
-  packetsPerCompany[packetData.company.id.toString()].push({
+  packetsPerCompany[companyId].push({
     ...packetData,
     location: packetData.location || suggestedLocation,
   });
