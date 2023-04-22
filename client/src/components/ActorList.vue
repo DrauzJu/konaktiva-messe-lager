@@ -17,6 +17,7 @@
           persistent-hint
           clearable
           hide-details
+          @keydown.enter="createActor"
         ></v-text-field>
       </v-col>
       <v-col>

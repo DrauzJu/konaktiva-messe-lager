@@ -112,7 +112,7 @@ import {
   PacketMovementType,
 } from "messe-lager-dto";
 import { computed, onMounted, reactive, ref } from "vue";
-import { VForm } from 'vuetify/components'
+import { VForm } from "vuetify/components";
 
 const props = defineProps({
   parentDialogActive: { type: Boolean, required: true },
@@ -171,7 +171,7 @@ const save = async () => {
 
   const actorValidationResult = await actorForm.value.validate();
   const locationValidationResult = await locationForm.value.validate();
-  
+
   if (!actorValidationResult.valid || !locationValidationResult.valid) {
     return;
   }
@@ -227,9 +227,9 @@ const addPacket = async (packetID: number) => {
   const companyId = packetData.company.id.toString();
 
   // Check if already scanned
-  const alreadyScanned = packetsPerCompany[companyId] && packetsPerCompany[companyId].some(
-    (elem) => elem.id === packetID
-  );
+  const alreadyScanned =
+    packetsPerCompany[companyId] &&
+    packetsPerCompany[companyId].some((elem) => elem.id === packetID);
 
   if (alreadyScanned) {
     console.log(`${packetID} already scanned!`);
@@ -270,9 +270,7 @@ const addPacket = async (packetID: number) => {
   // Store related company data
   // Must be fetched again because statistics are not included in packetData (all values are 0)
   try {
-    const companyResponse = await axios.get(
-      `/api/company/${companyId}`
-    );
+    const companyResponse = await axios.get(`/api/company/${companyId}`);
 
     companyData[companyId] = companyResponse.data as Company;
   } catch (e) {

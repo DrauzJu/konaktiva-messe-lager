@@ -3,10 +3,7 @@
     :model-value="loading"
     class="align-center justify-center"
   ></v-overlay>
-  <v-card
-    :loading="loading"
-    @click:outside="emit('update:parentDialogActive', false)"
-  >
+  <v-card :loading="loading">
     <v-toolbar color="primary" :title="'Paket #' + packetID"></v-toolbar>
     <v-card-text>
       <v-container class="pt-0 pb-0">
@@ -68,7 +65,7 @@
       <v-container v-if="!packet.isDestroyed">
         <v-row v-if="selectedAction === 'moveIn'">
           <v-col>
-            <v-form ref="form" lazy-validation>
+            <v-form ref="form" v-model="validForm" lazy-validation>
               <v-text-field
                 v-model="actionMoveInLocation"
                 label="Lagerplatz"
@@ -91,7 +88,7 @@
         </v-row>
         <v-row v-if="selectedAction === 'moveOut'">
           <v-col>
-            <v-form ref="form" lazy-validation>
+            <v-form ref="form" v-model="validForm" lazy-validation>
               <v-combobox
                 v-model="actionMoveOutActor"
                 label="Helfer"
@@ -106,7 +103,7 @@
         </v-row>
         <v-row v-if="selectedAction === 'moveLocation'">
           <v-col>
-            <v-form ref="form" lazy-validation>
+            <v-form ref="form" v-model="validForm" lazy-validation>
               <v-text-field
                 v-model="actionChangeLocationLocation"
                 label="Neuer Lagerplatz"
@@ -115,6 +112,15 @@
                 persistent-hint
                 clearable
               ></v-text-field>
+              <v-combobox
+                v-model="actionChangeLocationActor"
+                label="Helfer"
+                :rules="[(v) => !!v || 'Helfer angeben']"
+                :items="actorSuggestions"
+                :disabled="loading"
+                persistent-hint
+                clearable
+              ></v-combobox>
             </v-form>
           </v-col>
         </v-row>
@@ -213,7 +219,7 @@
         color="error"
         variant="outlined"
         :disabled="loading"
-        @click="emit('update:parentDialogActive', false)"
+        @click="closeDialog"
         >Abbrechen</v-btn
       >
       <v-spacer></v-spacer>
@@ -227,6 +233,7 @@
         Paket zerstören
       </v-btn>
       <v-btn
+        v-if="!packet.isDestroyed"
         color="Secondary"
         variant="outlined"
         :disabled="loading"
@@ -237,7 +244,12 @@
         v-if="!packet.isDestroyed"
         color="success"
         variant="outlined"
-        :disabled="loading || !selectedAction || selectedAction.length === 0"
+        :disabled="
+          !validForm ||
+          loading ||
+          !selectedAction ||
+          selectedAction.length === 0
+        "
         @click="save()"
         >{{ saveButtonText }}</v-btn
       >
@@ -246,7 +258,19 @@
 
   <v-dialog v-model="confirmDestroyDialog" activator="#packetDestroyButton">
     <v-card width="300px" class="align-self-center">
-      <v-card-text> Paket wirklich als "zerstört" markieren? </v-card-text>
+      <v-card-text>
+        <div class="mb-4">Paket wirklich als "zerstört" markieren?</div>
+        <v-form ref="form" v-model="validDestroyPacketForm" lazy-validation>
+          <v-combobox
+            v-model="destroyPacketActor"
+            label="Helfer"
+            :rules="[(v) => !!v || 'Helfer angeben']"
+            :items="actorSuggestions"
+            persistent-hint
+            clearable
+          ></v-combobox>
+        </v-form>
+      </v-card-text>
       <v-card-actions>
         <v-btn
           color="error"
@@ -256,7 +280,12 @@
           Abbrechen
         </v-btn>
         <v-spacer></v-spacer>
-        <v-btn color="success" variant="outlined" @click="destroyPacket()">
+        <v-btn
+          color="success"
+          variant="outlined"
+          :disabled="!validDestroyPacketForm"
+          @click="destroyPacket()"
+        >
           Ja
         </v-btn>
       </v-card-actions>
@@ -285,21 +314,26 @@ import {
 } from "messe-lager-dto";
 import axios from "axios";
 import printLabel from "../dymo/print";
-import { VForm } from 'vuetify/components'
+import { VForm } from "vuetify/components";
 
 const props = defineProps({
   parentDialogActive: { type: Boolean, required: true },
   packetID: { type: Number, required: true },
 });
 
-const emit = defineEmits(["update:parentDialogActive", "packetSaved"]);
+const emit = defineEmits(["update:parentDialogActive", "cardClosed"]);
 
 const loading = ref(false);
+const validForm = ref(false);
 const selectedAction = ref<string>();
 const actionMoveInActor = ref<string>();
 const actionMoveInLocation = ref<string>();
 const actionMoveOutActor = ref<string>();
 const actionChangeLocationLocation = ref<string>();
+const actionChangeLocationActor = ref<string>();
+
+const validDestroyPacketForm = ref(false);
+const destroyPacketActor = ref<string>();
 
 const dateTimeFormat = new Intl.DateTimeFormat("default", {
   year: "numeric",
@@ -351,12 +385,17 @@ const getMovementColor = (movement: PacketMovement) => {
     case PacketMovementType.IN:
       return "success";
     case PacketMovementType.OUT:
-    // fallthrough
-    case PacketMovementType.DESTROY:
       return "error";
+    case PacketMovementType.DESTROY:
+      return "white";
     case PacketMovementType.LOCATION_CHANGE:
       return "info";
   }
+};
+
+const closeDialog = () => {
+  emit("update:parentDialogActive", false);
+  emit("cardClosed");
 };
 
 const destroyPacket = async () => {
@@ -366,7 +405,7 @@ const destroyPacket = async () => {
     packetId: props.packetID,
     oldLocation: packet.location,
     newLocation: undefined,
-    actor: undefined,
+    actor: destroyPacketActor.value,
   };
 
   try {
@@ -398,7 +437,7 @@ const save = async () => {
 
   let data: CreatePacketMovementParams;
   const validationResult = await form.value.validate();
-  
+
   if (!validationResult.valid) {
     return;
   }
@@ -433,7 +472,7 @@ const save = async () => {
         packetId: props.packetID,
         oldLocation: packet.location,
         newLocation: actionChangeLocationLocation.value,
-        actor: undefined,
+        actor: actionChangeLocationActor.value,
       };
 
       break;
@@ -448,8 +487,7 @@ const save = async () => {
     return;
   }
 
-  emit("update:parentDialogActive", false);
-  emit("packetSaved");
+  closeDialog();
 };
 
 const saveComment = async () => {

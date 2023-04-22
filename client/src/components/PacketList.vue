@@ -64,11 +64,12 @@
     max-width="1000px"
     min-width="450px"
     scrollable
+    @click:outside="loadPackets()"
   >
     <PacketCard
       v-model:parentDialogActive="packetDialogVisible"
       :packet-i-d="selectedPacket"
-      @packet-saved="loadPackets"
+      @card-closed="loadPackets"
     />
   </v-dialog>
 
@@ -121,7 +122,7 @@ let scannerInput = "";
 
 const headers: Header[] = [
   { text: "Nummer", value: "id", sortable: true },
-  { text: "Tag", value: "day", sortable: false },
+  { text: "Tag", value: "day", sortable: true },
   { text: "Unternehmen", value: "company", sortable: true },
   { text: "Position", value: "location", sortable: true },
 ];
@@ -132,8 +133,6 @@ const showPacketDetails = (item: ClickRowArgument) => {
 };
 
 const loadPackets = async () => {
-  items.length = 0;
-
   try {
     items.length = 0;
     const response = await axios.get("/api/packet");
@@ -145,7 +144,7 @@ const loadPackets = async () => {
 
       items.push({
         id: packet.id,
-        location: packet.isDestroyed ? 'ZERSTÖRT' : packet.location,
+        location: packet.isDestroyed ? "ZERSTÖRT" : packet.location,
         company: `${packet.company.name} (Stand ${packet.company.booth})`,
         day: packet.company.day,
         isDestroyed: packet.isDestroyed,

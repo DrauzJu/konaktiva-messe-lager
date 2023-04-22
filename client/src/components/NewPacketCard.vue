@@ -138,15 +138,26 @@ const save = async () => {
     comment: comment.value,
   };
 
+  const totalPackets = selectedAmount.value;
+  let createdPackets = 0;
+
   try {
-    for (let i = 0; i < selectedAmount.value; i++) {
+    for (let i = 0; i < totalPackets; i++) {
       const response = await axios.post("/api/packet", data);
       const newPacket = response.data as Packet;
 
-      await printLabel(newPacket.id, newPacket.company.name);
+      createdPackets++;
+
+      try {
+        await printLabel(newPacket.id, newPacket.company.name);
+      } catch (e) {
+        alert("Error printing label!");
+      }
     }
   } catch (e) {
-    alert(e);
+    alert(
+      `Error saving new packet. ${createdPackets} out of ${totalPackets} created successfully.`
+    );
   }
 
   emit("update:parentDialogActive", false);
