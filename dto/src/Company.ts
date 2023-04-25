@@ -1,13 +1,13 @@
 import { Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
-import { Packet } from "./Packet";
+import { PacketDetailed } from "./Packet";
 
 export type Company = {
   id: number;
   name: string;
   day: string;
   booth: string;
-  packets: Packet[];
+  packets: PacketDetailed[];
   totalPackets?: number;
   packetsNotInWarehouse?: number;
 };

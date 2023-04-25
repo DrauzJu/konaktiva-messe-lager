@@ -23,7 +23,7 @@ export class CompanyService {
   public async findCompany(id: number): Promise<Company | null> {
     return this.companyRepository.findOne({
       where: { id },
-      relations: ['packets'],
+      relations: ['packets', 'packets.movements'],
     });
   }
 

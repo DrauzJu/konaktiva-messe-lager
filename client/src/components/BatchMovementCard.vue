@@ -4,7 +4,7 @@
     class="align-center justify-center"
   ></v-overlay>
   <v-card :loading="loading">
-    <v-toolbar color="primary" :title="cardTitle"></v-toolbar>
+    <v-toolbar color="primary" :title="'Batch-' + mvTypeText"></v-toolbar>
     <v-card-text>
       <v-container style="padding: 0">
         <v-row no-gutters>
@@ -25,25 +25,30 @@
         </v-row>
         <v-row no-gutters>
           <v-col>
+            <v-alert type="info" class="mt-3">
+              {{ mvTypeText }} für: {{ companyData.name }} (Stand
+              {{ companyData.booth }})
+            </v-alert>
             <v-list>
               <v-form ref="locationForm" lazy-validation>
-                <div v-for="item in listData" :key="item.key">
-                  <v-divider v-if="item.type === 'company'"></v-divider>
-                  <v-list-subheader v-if="item.type === 'company'">{{
-                    item.name
-                  }}</v-list-subheader>
-                  <v-list-item v-if="item.type === 'packet'">
+                <div v-for="item in packets" :key="item.id">
+                  <v-list-item
+                    v-if="!item.isDestroyed"
+                    :class="{ 'text-disabled': !item.scanned }"
+                  >
                     <v-container style="padding: 0">
                       <v-row no-gutters class="align-center">
-                        <v-col>
+                        <v-col cols="4">
                           <v-list-item-title>
-                            Paket {{ item.data!.id }}
+                            {{ item.scanned ? "&#9989; " : "&#10060; " }}
+                            Paket {{ item.id }}
                           </v-list-item-title>
                         </v-col>
                         <v-spacer></v-spacer>
-                        <v-col>
+                        <v-col cols="5">
                           <v-text-field
-                            v-model="item.data!.location"
+                            v-if="item.scanned"
+                            v-model="item.location"
                             hide-details
                             label="von/nach Lagerplatz"
                             :rules="[(v) => !!v || 'Lagerplatz angeben']"
@@ -51,6 +56,18 @@
                               batchMovementType === PacketMovementType.OUT
                             "
                           ></v-text-field>
+                          <div v-else-if="batchMovementType === PacketMovementType.IN && !item.location">
+                            Paket beim Unternehmen!
+                          </div>
+                          <div v-else-if="batchMovementType === PacketMovementType.IN && !!item.location">
+                            Paket schon eingelagert ({{ item.location }})
+                          </div>
+                          <div v-else-if="batchMovementType === PacketMovementType.OUT && !item.location">
+                            Paket schon ausgelagert
+                          </div>
+                          <div v-else-if="batchMovementType === PacketMovementType.OUT && !!item.location">
+                            Paket im Lager
+                          </div>
                         </v-col>
                       </v-row>
                     </v-container>
@@ -78,7 +95,7 @@
         :disabled="loading || !actor"
         @click="save"
       >
-        {{ confirmBtnTitle }}
+        {{ mvTypeText }} ausführen
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -94,11 +111,22 @@
 
   <v-snackbar
     v-model="scannedPacketDuplicateSnackbar"
-    timeout="3000"
+    timeout="2000"
     color="error"
     elevation="24"
   >
     <div class="text-center">Paket bereits gescannt!</div>
+  </v-snackbar>
+
+  <v-snackbar
+    v-model="scannedPacketInvalidCompany"
+    timeout="4000"
+    color="error"
+    elevation="24"
+  >
+    <div class="text-center">
+      Paket nicht gefunden - Falsche ID oder anderes Unternehmen!
+    </div>
   </v-snackbar>
 </template>
 
@@ -111,8 +139,12 @@ import {
   PacketDetailed,
   PacketMovementType,
 } from "messe-lager-dto";
-import { computed, onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { VForm } from "vuetify/components";
+
+type BatchPacket = PacketDetailed & {
+  scanned: boolean;
+};
 
 const props = defineProps({
   parentDialogActive: { type: Boolean, required: true },
@@ -122,46 +154,28 @@ const props = defineProps({
 const emit = defineEmits(["update:parentDialogActive", "batchMovementsSaved"]);
 
 const loading = ref(false);
-const cardTitle = ref("");
-const confirmBtnTitle = ref("");
+const mvTypeText = ref("");
 const actor = ref("");
 const actorSuggestions = reactive<Actor[]>([]);
-const packetsPerCompany = reactive<Record<string, Array<PacketDetailed>>>({});
-const scannedPacketFailureSnackbar = ref(false);
-const scannedPacketDuplicateSnackbar = ref(false);
+
+const packets = reactive<BatchPacket[]>([]);
+const companyData = reactive<Company>({
+  id: 0,
+  booth: "",
+  day: "",
+  name: "",
+  packets: [],
+});
+
 const actorForm = ref<VForm | null>(null);
 const locationForm = ref<VForm | null>(null);
 
+const scannedPacketFailureSnackbar = ref(false);
+const scannedPacketDuplicateSnackbar = ref(false);
+const scannedPacketInvalidCompany = ref(false);
+
 let scannerInput = "";
 let batchMovementType: PacketMovementType;
-let companyData: Record<string, Company> = {};
-
-const listData = computed(() => {
-  const data = [];
-
-  for (const companyID in packetsPerCompany) {
-    const companyInfo = companyData[companyID];
-    const packetsInWarehouse =
-      companyInfo.totalPackets! - companyInfo.packetsNotInWarehouse!;
-
-    data.push({
-      type: "company",
-      key: `company--${companyInfo.id}`,
-      name: `${companyInfo.name} (${packetsInWarehouse}/${companyInfo.totalPackets} im Lager)`,
-    });
-
-    const packets = packetsPerCompany[companyID];
-    for (const packet of packets) {
-      data.push({
-        type: "packet",
-        key: `packet--${packet.id}`,
-        data: packet,
-      });
-    }
-  }
-
-  return data;
-});
 
 const save = async () => {
   // Maybe refs need some time?!
@@ -179,29 +193,31 @@ const save = async () => {
   loading.value = true;
   const failedOperations: number[] = [];
 
-  for (const companyID in packetsPerCompany) {
-    const packets = packetsPerCompany[companyID];
-    for (const packet of packets) {
-      let data: CreatePacketMovementParams = {
-        time: new Date(),
-        type: batchMovementType,
-        packetId: packet.id,
-        actor: actor.value,
-        oldLocation: undefined,
-        newLocation: undefined,
-      };
+  for (const packet of packets) {
+    // Do nothing for packets which are not scanned
+    if (!packet.scanned) {
+      continue;
+    }
 
-      if (batchMovementType === PacketMovementType.IN) {
-        data.newLocation = packet.location;
-      } else {
-        data.oldLocation = packet.location;
-      }
+    let data: CreatePacketMovementParams = {
+      time: new Date(),
+      type: batchMovementType,
+      packetId: packet.id,
+      actor: actor.value,
+      oldLocation: undefined,
+      newLocation: undefined,
+    };
 
-      try {
-        await axios.post("/api/packetMovement", data);
-      } catch (e) {
-        failedOperations.push(packet.id);
-      }
+    if (batchMovementType === PacketMovementType.IN) {
+      data.newLocation = packet.location;
+    } else {
+      data.oldLocation = packet.location;
+    }
+
+    try {
+      await axios.post("/api/packetMovement", data);
+    } catch (e) {
+      failedOperations.push(packet.id);
     }
   }
 
@@ -215,38 +231,28 @@ const save = async () => {
 };
 
 const addPacket = async (packetID: number) => {
-  let packetResponse: AxiosResponse;
-  try {
-    packetResponse = await axios.get(`/api/packet/${packetID}`);
-  } catch (e) {
-    scannedPacketFailureSnackbar.value = true;
+  const packet = packets.find((p) => p.id === packetID);
+
+  if (!packet) {
+    scannedPacketInvalidCompany.value = true;
     return;
   }
 
-  const packetData = packetResponse.data as PacketDetailed;
-  const companyId = packetData.company.id.toString();
-
   // Check if already scanned
-  const alreadyScanned =
-    packetsPerCompany[companyId] &&
-    packetsPerCompany[companyId].some((elem) => elem.id === packetID);
-
-  if (alreadyScanned) {
-    console.log(`${packetID} already scanned!`);
+  if (packet.scanned) {
     scannedPacketDuplicateSnackbar.value = true;
     return;
   }
 
-  let movementType: PacketMovementType | undefined;
-
   // Check packet status
-  if (packetData.isDestroyed) {
+  if (packet.isDestroyed) {
     scannedPacketFailureSnackbar.value = true;
     return;
   }
 
   // Check movement type
-  if (!packetData.location) {
+  let movementType: PacketMovementType;
+  if (!packet.location) {
     movementType = PacketMovementType.IN;
   } else {
     movementType = PacketMovementType.OUT;
@@ -260,34 +266,16 @@ const addPacket = async (packetID: number) => {
   // Get a suggested location
   let suggestedLocation = "";
   if (movementType === PacketMovementType.IN) {
-    const lastMovementWithLocation = packetData.movements.findLast(
+    const lastMovementWithLocation = packet.movements.findLast(
       (movement) => movement.newLocation !== null
     );
 
     suggestedLocation = lastMovementWithLocation?.newLocation ?? "";
   }
 
-  // Store related company data
-  // Must be fetched again because statistics are not included in packetData (all values are 0)
-  try {
-    const companyResponse = await axios.get(`/api/company/${companyId}`);
-
-    companyData[companyId] = companyResponse.data as Company;
-  } catch (e) {
-    console.log(e); // Silently ignore
-  }
-
-  // Add to list packetsPerCompany
-  if (!(companyId in packetsPerCompany)) {
-    packetsPerCompany[companyId] = [];
-  }
-
-  packetsPerCompany[companyId].push({
-    ...packetData,
-    location: packetData.location || suggestedLocation,
-  });
-
-  return packetData;
+  // Update packet
+  packet.scanned = true;
+  packet.location = suggestedLocation || packet.location;
 };
 
 const setKeypressListener = () => {
@@ -313,18 +301,39 @@ onMounted(async () => {
   loading.value = true;
   setKeypressListener();
 
-  const packet = await addPacket(props.firstPacketID);
-  if (!packet) {
+  let packetResponse: AxiosResponse;
+  try {
+    packetResponse = await axios.get(`/api/packet/${props.firstPacketID}`);
+  } catch (e) {
+    scannedPacketFailureSnackbar.value = true;
+    return;
+  }
+
+  const packet = packetResponse.data as PacketDetailed;
+
+  try {
+    const companyResponse = await axios.get(
+      `/api/company/${packet.company.id}`
+    );
+    Object.assign(companyData, companyResponse.data as Company);
+  } catch (e) {
     throw new Error("BatchMovementCard cannot be instantiated!");
   }
 
+  packets.length = 0;
+  packets.push(
+    ...companyData.packets.map((p) => {
+      return { ...p, scanned: false };
+    })
+  );
+
+  await addPacket(props.firstPacketID);
+
   if (!packet.location) {
-    cardTitle.value = "Batch-Einlagerung";
-    confirmBtnTitle.value = "Einlagerung ausführen";
+    mvTypeText.value = "Einlagerung";
     batchMovementType = PacketMovementType.IN;
   } else {
-    cardTitle.value = "Batch-Auslagerung";
-    confirmBtnTitle.value = "Auslagerung ausführen";
+    mvTypeText.value = "Auslagerung";
     batchMovementType = PacketMovementType.OUT;
   }
 

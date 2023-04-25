@@ -22,6 +22,7 @@ export class PacketMovementService {
   ): Promise<PacketMovement> {
     const packet = await this.packetRepository.findOneBy({
       id: data.packetId,
+      isDestroyed: false,
     });
 
     if (packet === null) {
