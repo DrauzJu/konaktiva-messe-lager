@@ -15,6 +15,20 @@ yarn workspaces run build
 
 See workspaces `dto`, `server` and `client` for details
 
+# Start application
+
+Important: start database before and configure server `.env` file (see (here)[server/README.md])!
+
+```bash
+yarn install
+yarn workspaces run build
+
+cd server
+yarn start
+```
+
+Open http://<host>:3000
+
 # Read-Only Setup
 
 In server `.env`, set `READ_ONLY_ACCESS=true`. This will block all requests with HTTP method not equals to `GET`.
