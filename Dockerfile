@@ -1,4 +1,4 @@
-FROM node:16 AS client-build
+FROM node:20 AS client-build
 ENV YARN_CACHE_FOLDER="/root/.yarn"
 RUN mkdir /workspace
 COPY . /workspace
@@ -7,7 +7,7 @@ RUN --mount=type=cache,target=/root/.yarn \
   cd ./dto && yarn build && cd .. && \
   cd ./client && yarn build && cd ..
 
-FROM node:16
+FROM node:20
 ENV YARN_CACHE_FOLDER="/root/.yarn"
 RUN mkdir /workspace
 COPY --from=client-build /workspace/client/dist /workspace/client/dist
