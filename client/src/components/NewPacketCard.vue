@@ -16,7 +16,7 @@
           v-model="selectedCompany"
           label="Unternehmen"
           :items="companies"
-          item-title="name"
+          item-title="nameAndDay"
           item-value="id"
           :rules="[(v) => v != null || 'Bitte Unternehmen angeben']"
           :disabled="loading"
@@ -67,6 +67,8 @@ import { Company, CreatePacketParams, Packet } from "messe-lager-dto";
 import { onMounted, reactive, ref, watch } from "vue";
 import printLabel from "../dymo/print";
 
+type CompanyWithNameDayField = Company & { nameAndDay: string };
+
 defineProps({
   parentDialogActive: { type: Boolean, required: true },
 });
@@ -79,7 +81,7 @@ const selectedAmount = ref<number>(1);
 const selectedCompany = ref<number>();
 const selectedLocation = ref<string>("");
 const comment = ref<string>("");
-const companies = reactive<Company[]>([]);
+const companies = reactive<CompanyWithNameDayField[]>([]);
 const packetsOnSameLocation = reactive<string[]>([]);
 
 watch(selectedCompany, async (newValue) => {
@@ -169,8 +171,17 @@ const loadCompanies = async () => {
 
   try {
     companies.length = 0;
-    const response = await axios.get("/api/company");
-    companies.push(...response.data);
+    const response = (await axios.get("/api/company")) as { data: Company[] };
+
+    companies.push(
+      ...response.data.map(
+        (company: Company) =>
+          ({
+            ...company,
+            nameAndDay: `${company.name} (Tag: ${company.day})`,
+          } satisfies CompanyWithNameDayField)
+      )
+    );
   } catch (e) {
     alert(e);
   }
