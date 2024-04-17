@@ -133,7 +133,7 @@ export default function getLabelXML(barcode: number, company: string) {
                 <IsVertical>False</IsVertical>
                 <LineTextSpan>
                   <TextSpan>
-                    <Text>konaktiva 2023</Text>
+                    <Text>konaktiva 2024</Text>
                     <FontInfo>
                       <FontName>Arial</FontName>
                       <FontSize>24.5</FontSize>
