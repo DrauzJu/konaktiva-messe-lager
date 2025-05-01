@@ -59,4 +59,8 @@ export class PacketService {
   public async updatePacket(id: number, data: Partial<Packet>): Promise<void> {
     await this.packetRepository.update(id, data);
   }
+
+  public async deletePackets(): Promise<void> {
+    await this.packetRepository.query('DELETE FROM packet');
+  }
 }

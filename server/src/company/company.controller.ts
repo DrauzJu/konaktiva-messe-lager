@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -98,5 +99,10 @@ export class CompanyController {
     await Promise.all(
       validatedData.map((data) => this.companyService.upsertCompany(data)),
     );
+  }
+
+  @Delete()
+  public async deleteCompanys(): Promise<void> {
+    await this.companyService.deleteCompanys();
   }
 }

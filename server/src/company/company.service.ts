@@ -71,4 +71,8 @@ export class CompanyService {
 
     return this.createCompany(data);
   }
+
+  public async deleteCompanys(): Promise<void> {
+    await this.companyRepository.query('DELETE FROM company');
+  }
 }

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpException,
   HttpStatus,
   Post,
@@ -31,5 +32,10 @@ export class PacketMovementController {
     }
 
     return this.packetMovementService.createPacketMovement(data);
+  }
+
+  @Delete()
+  public async deletePacketMovements(): Promise<void> {
+    await this.packetMovementService.deletePacketMovements();
   }
 }

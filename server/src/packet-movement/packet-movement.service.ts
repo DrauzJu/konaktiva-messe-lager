@@ -56,4 +56,8 @@ export class PacketMovementService {
 
     return this.packetMovementRepository.save(movement);
   }
+
+  public async deletePacketMovements(): Promise<void> {
+    await this.packetRepository.query('TRUNCATE TABLE packet_movement');
+  }
 }

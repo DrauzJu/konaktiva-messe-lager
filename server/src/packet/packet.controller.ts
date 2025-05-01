@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -75,5 +76,10 @@ export class PacketController {
     }
 
     await this.packetService.updatePacket(id, data);
+  }
+
+  @Delete()
+  public async deletePackets(): Promise<void> {
+    await this.packetService.deletePackets();
   }
 }
