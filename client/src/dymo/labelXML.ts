@@ -202,7 +202,7 @@ export default function getLabelXML(barcode: number, company: string, year: stri
                 <IsVertical>False</IsVertical>
                 <LineTextSpan>
                   <TextSpan>
-                    <Text>${company.substring(0, 15)}</Text>
+                    <Text>${company}</Text>
                     <FontInfo>
                       <FontName>Arial</FontName>
                       <FontSize>17.9</FontSize>

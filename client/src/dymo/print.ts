@@ -1,4 +1,5 @@
 import getLabelXML from "./labelXML";
+import anyAscii from 'any-ascii';
 
 export default async function printLabel(barcode: number, companyName: string) {
   await new Promise((resolve) => {
@@ -6,7 +7,7 @@ export default async function printLabel(barcode: number, companyName: string) {
   });
 
   const currentYear = new Date().getFullYear().toString();
-  const labelXML = getLabelXML(barcode, companyName, currentYear);
+  const labelXML = getLabelXML(barcode, anyAscii(companyName).substring(0, 15), currentYear);
   const label = dymo.label.framework.openLabelXml(labelXML);
 
   const printers = dymo.label.framework.getPrinters();
