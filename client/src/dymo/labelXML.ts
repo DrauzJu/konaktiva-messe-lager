@@ -1,4 +1,4 @@
-export default function getLabelXML(barcode: number, company: string) {
+export default function getLabelXML(barcode: number, company: string, year: string) {
   return `<?xml version="1.0" encoding="utf-8"?>
     <DesktopLabel Version="1">
       <DYMOLabel Version="3">
@@ -133,7 +133,7 @@ export default function getLabelXML(barcode: number, company: string) {
                 <IsVertical>False</IsVertical>
                 <LineTextSpan>
                   <TextSpan>
-                    <Text>konaktiva 2025</Text>
+                    <Text>konaktiva ${year}</Text>
                     <FontInfo>
                       <FontName>Arial</FontName>
                       <FontSize>24.5</FontSize>
