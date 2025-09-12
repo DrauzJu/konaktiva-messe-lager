@@ -1,12 +1,16 @@
-Requires: yarn, node
+<img src="./client/public/favicon.svg" width="256">
 
-# Tech-Stack
+Packet storage management application for [konaktiva Darmstadt (student job fair)](https://www.konaktiva.tu-darmstadt.de/).
+
+## Tech-Stack
+
+Requires: yarn, node
 
 - Server: Node + Typescript + NestJS
 - Client: Typescript + Vue 3 + Vuetify Next
 - Database: MySQL
 
-# Install and build all
+## Install and build all
 
 ```bash
 yarn install
@@ -15,9 +19,9 @@ yarn workspaces run build
 
 See workspaces `dto`, `server` and `client` for details
 
-# Start application
+## Start application
 
-Important: start database before and configure server `.env` file (see (here)[server/README.md])!
+Start database before and configure server `.env` file (see [here](./server/README.md))!
 
 ```bash
 yarn install
@@ -27,9 +31,9 @@ cd server
 yarn start
 ```
 
-Open http://<host>:3000
+Open http://localhost:3000
 
-# Read-Only Setup
+## Read-Only Setup
 
 In server `.env`, set `READ_ONLY_ACCESS=true`. This will block all requests with HTTP method not equals to `GET`.
 
